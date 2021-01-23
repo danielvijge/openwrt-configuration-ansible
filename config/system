@@ -1,0 +1,61 @@
+
+config system
+	option ttylogin '0'
+	option log_size '64'
+	option urandom_seed '0'
+	option zonename 'Europe/Amsterdam'
+	option hostname '{{ name }}'
+	option log_proto 'udp'
+	option conloglevel '8'
+	option cronloglevel '5'
+	option timezone 'CET-1CEST,M3.5.0,M10.5.0/3'
+
+config timeserver 'ntp'
+	list server '0.openwrt.pool.ntp.org'
+	list server '1.openwrt.pool.ntp.org'
+	list server '2.openwrt.pool.ntp.org'
+	list server '3.openwrt.pool.ntp.org'
+
+{% if model is defined and model == 'archer-c7-v5' %}
+config led
+	option sysfs 'tp-link:green:wan'
+	option name 'WAN'
+	option default '0'
+	option trigger 'netdev'
+	option dev 'eth0.2'
+	list mode 'tx'
+	list mode 'rx'
+
+config led
+	option sysfs 'tp-link:green:lan1'
+	option default '0'
+	option trigger 'switch0'
+	option port_mask '0x04'
+	option name 'LAN1'
+	option speed_mask '0x0E'
+
+config led
+	option sysfs 'tp-link:green:lan2'
+	option default '0'
+	option trigger 'switch0'
+	option port_mask '0x08'
+	option name 'LAN2'
+	option speed_mask '0x0E'
+
+config led
+	option sysfs 'tp-link:green:lan3'
+	option default '0'
+	option trigger 'switch0'
+	option port_mask '0x10'
+	option name 'LAN3'
+	option speed_mask '0x0E'
+
+config led
+	option default '0'
+	option trigger 'switch0'
+	option name 'LAN4'
+	option sysfs 'tp-link:green:lan4'
+	option port_mask '0x12'
+	option speed_mask '0x0E'
+{% endif %}
+

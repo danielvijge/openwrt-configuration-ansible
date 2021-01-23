@@ -1,0 +1,63 @@
+
+config dnsmasq
+	option domainneeded '1'
+	option localise_queries '1'
+	option rebind_protection '1'
+	option rebind_localhost '1'
+	option expandhosts '1'
+	option authoritative '1'
+	option readethers '1'
+	option leasefile '/tmp/dhcp.leases'
+	option localservice '1'
+	option domain '{{ SSID }}'
+	option local '/{{ SSID }}/'
+
+config dhcp 'lan'
+	option interface 'lan'
+	option limit '150'
+	option leasetime '12h'
+	option start '{{ groups['openwrt'] | length +2 }}'
+	option ra 'server'
+	option dhcpv6 'server'
+	option ra_management '1'
+
+config dhcp 'wan'
+	option interface 'wan'
+	option ignore '1'
+
+config odhcpd 'odhcpd'
+	option maindhcp '0'
+	option leasefile '/tmp/hosts/odhcpd'
+	option leasetrigger '/usr/sbin/odhcpd-update'
+	option loglevel '4'
+
+{% for ap in aps %}
+config host
+	option mac '{{ hostvars[ap].mac }}'
+	option dns '1'
+	option ip '{{ network | ipaddr(hostvars[ap].id) | ipv4('address')}}'
+	option name '{{ hostvars[ap].name }}'
+	option hostid '{{ hostvars[ap].id }}'
+	option duid '{{ hostvars[ap].duid }}'
+
+{% endfor %}
+{% if static_hosts is defined %}
+{% for host in static_hosts %}
+config host
+	option name '{{ host.name }}'
+	option mac '{{ host.mac }}'
+	option dns '1'
+	option ip '{{ network | ipaddr(host.id) | ipv4('address')}}'
+	option hostid '{{ host.id }}'
+	option duid '{{ host.duid }}'
+	
+{% endfor %}
+{% endif %}
+{% if host_names is defined %}
+{% for host in host_names %}
+config domain
+	option name '{{ host.name }}'
+	option ip '{{ host.ip }}'
+
+{% endfor %}
+{% endif %}

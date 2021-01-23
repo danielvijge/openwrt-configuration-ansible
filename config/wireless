@@ -1,0 +1,54 @@
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option channel '36'
+	option hwmode '11a'
+	option path '{{ radio5_path }}'
+	option htmode '{{ radio5_htmode }}'
+	option country 'NL'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option key '{{ passphrase }}'
+	option encryption 'psk2'
+	option ssid '{{ SSID }}'
+	option ft_over_ds '1'
+	option ft_psk_generate_local '1'
+	option ieee80211r '1'
+	option nasid '{{ name }}-5'
+	option mobility_domain '4f57'
+	option macfilter 'deny'
+{% if blocked_mac_addresses_on_wifi is defined %}
+{% for macaddress in blocked_mac_addresses_on_wifi %}
+	list maclist '{{ macaddress }}'
+{% endfor %}
+{% endif %}
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option channel '11'
+	option hwmode '11g'
+	option path '{{ radio2_path }}'
+	option htmode '{{ radio2_htmode }}'
+	option country 'NL'
+
+config wifi-iface 'default_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option key '{{ passphrase }}'
+	option encryption 'psk2'
+	option ssid '{{ SSID }}'
+	option ft_over_ds '1'
+	option ft_psk_generate_local '1'
+	option ieee80211r '1'
+	option mobility_domain '4f57'
+	option nasid '{{ name }}-2'
+	option macfilter 'deny'
+{% if blocked_mac_addresses_on_wifi is defined %}
+{% for macaddress in blocked_mac_addresses_on_wifi %}
+	list maclist '{{ macaddress }}'
+{% endfor %}
+{% endif %}

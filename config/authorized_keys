@@ -1,0 +1,5 @@
+{% if authorized_keys is defined %}
+{% for key in authorized_keys %}
+{{ key }}
+{% endfor %}
+{% endif %}

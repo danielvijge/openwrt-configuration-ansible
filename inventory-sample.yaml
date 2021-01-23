@@ -1,0 +1,164 @@
+# Must be named openwrt
+openwrt:
+  children:
+    # There must be a section 'routers' that contains the main router in the network
+    # There should be only 1 device in this section
+    routers:
+      hosts:
+        # The name or IP address can is used to reach this device
+        router.mylan:
+          # ID of this device, will get the IP address ending in .1
+          id: 1
+          # Unique name for this device
+          name: router
+          # Set the model, used to select the correct firmware
+          # can also be used to differentiate configuration based on the model
+          # if the complete network contains different models
+          model: archer-c7-v5
+          # MAC address of the port that connect upstream. For the router this
+          # is the port that is connected to the mode.
+          mac: DD:73:8A:96:87:61
+          # HTMode for the wireless radio on the 2.4GHz band
+          radio2_htmode: HT20
+          # HTMode for the wireless radio on the 5Hz band
+          radio5_htmode: VHT80
+      vars:
+        # Packages that will be installed on all devices in the group routers,
+        # but not on devices on other groups
+        packages_installed:
+          - luci-app-upnp
+          - luci-app-sqm
+          - luci-proto-ipv6
+          - 6in4
+        # Additional packages stored in the `packages` folder that will be installed on
+        # all devices in the routers group
+        local_packages_installed:
+          - miniupnpd_2.1.20200510-3_mips_24kc.ipk
+    # All the access points. There can be 0 or more access points
+    aps:
+      hosts:
+        # The name or IP address can is used to reach this device
+        ap1.mylan:
+          # ID of this device, will get the IP address ending in .2
+          id: 2
+          # Unique name for this device
+          name: ap1
+          # MAC address of the port that connect upstream. For the a[] this
+          # is the internet (WAN) port that is connected to the router
+          mac: E0:5A:EB:0A:73:1C
+          # DUID of the device, used for static leases in DHCP
+          duid: 00030001e05aeb0a731c
+        # Configuration of additional devices
+        ap2.mylan:
+          id: 3
+          name: ap2
+          model: wdr4300
+          mac: 3E:DE:7C:A8:98:EF
+          duid: 000300013ede7ca898ef
+      vars:
+          # Settings that apply to all devices in the group aps. If a device
+          # has different settings, these can be moved to the individual device
+          # level. Or even subgroups can be created under the group aps.
+          model: wdr4300
+          radio2_htmode: HT20
+          radio5_htmode: HT20
+          # Services that need to be disabled on access points.
+          disabled_services:
+            - dnsmasq
+            - firewall
+            - odhcpd
+          # Packages that will be removed for all devices the group aps
+          packages_removed:
+            #- sample
+  vars:
+    # SSH connection settings. Use the private key in ~/.ssh/id_rsa to connect
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i ~/.ssh/id_rsa'
+    # Packages that will be installed on all devices
+    # Don't move this to a lower level; instead use `packages_installed`
+    # for packages that must be installed on devices in a group. The packages
+    # installed is always common_packages_installed + packages_installed
+    common_packages_installed:
+      - wpad
+      - luci-ssl
+      - nano
+    # Packages that will be removed on all devices. Use `packages_removed`
+    # to set packages on a group level that should be removed.
+    common_packages_removed:
+      - wpad-basic
+    # Network address, this would allow address from 10.0.0.1 - 10.0.0.255
+    network: 10.0.0.0/24
+    # Local IPv6 addresses
+    ula_prefix: fd54:28cd:b1c3::/48
+    # Name of the wireless network
+    SSID: mylan
+    # Wireless password
+    passphrase: mypassword
+    # SSH password of the root user
+    ssh_password: rootpassword
+    # Physical address of the wireless radios. Move lower if using different model, with different settings
+    # per model
+    radio2_path: platform/ahb/18100000.wmac
+    radio5_path: pci0000:00/0000:00:00.0
+    # List if SSH keys that can access SSH passwordless
+    authorized_keys:
+      - ssh-rsa AAAAB3N....== user@machine
+    
+    # All configuration below is optional and can safely be removed
+
+    # Optionally, use Hurricane Electric/Tunnelbroker to get IPv6 if you don't have native IPv6
+    # See https://tunnelbroker.net/
+    henet:
+      username: username
+      password: passsword
+      tunnelid: 123456
+      peeraddr: 216.66.84.46
+      ip6addr: 2001:470:1abcd:4df::2/64
+      ip6prefix: 2001:470:1abc:4de::/64
+      sqm:
+        download: 16000
+        upload: 2300
+    # MAC addresses that should be blocked from WiFi access
+    blocked_mac_addresses_on_wifi:
+      - A6:00:55:27:4B:75
+      - F4:8C:80:05:16:A1
+    # Port forwards to set for the firewall
+    port_forwards:
+      - name: myNas-SSH
+        port: 22
+        # ID/IP to forward to, this select the IP ending in .254
+        to: 254
+      - name: myNas-HTTP
+        port: 80
+        to: 254
+      - name: myNas-HTTPS
+        port: 443
+        to: 254
+    # List of additional devices that must receive a status IP address
+    # Don't include the access points, they are automatically added
+    static_hosts:
+      - name: nas
+        # ID/IP to forward to, this select the IP ending in .254
+        id: 254
+        mac: 20:09:AF:FA:7B:31
+        duid: 0001000123f7fb792009affa7b31
+    # Hostname that are created. Devices that have a DHCP name will automatically
+    # be accessible via name.network
+    host_names:
+      - name: cloudserver
+        ip: 51.91.100.31
+      - name: cloudserver
+        ip: 2001:4101:505:100::4b00
+      - name: modem
+        ip: 10.0.1.1
+    # If a device doesn't set a DHCP hostname (shown as - or ? in the overview of luci),
+    # you can still set/overwrite the name without setting a static address or host_name
+    # for the device
+    ethers:
+      - name: smartHomeDevice
+        mac: 59:A7:68:D6:09:8B
+    # Smart Queue Management settings (only used if SQM is installed)
+    sqm:
+      download: 23000
+      upload: 2300
+      linklayer: ethernet
+      overhead: 22

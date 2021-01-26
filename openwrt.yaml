@@ -60,55 +60,70 @@
         delay: 60
 
     - name: Remove packages
-      when: common_packages_removed is defined or packages_removed is defined
+      when: common_packages.remove is defined or packages.remove is defined
       opkg:
         name: '{{ item }}'
         state: absent
       with_flattened:
-        - '{{ common_packages_removed | default([]) }}'
-        - '{{ packages_removed | default([]) }}'
+        - '{{ common_packages.remove | default([]) }}'
+        - '{{ packages.remove | default([]) }}'
       loop_control:
         label: Removing {{ item }}
     
     - name: Install packages
-      when: common_packages_installed is defined or packages_installed is defined
+      when: common_packages.install is defined or packages.install is defined
       opkg:
         name: '{{ item }}'
         state: present
         update_cache: yes
       with_flattened:
-        - '{{ common_packages_installed | default([]) }}'
-        - '{{ packages_installed | default([]) }}'
+        - '{{ common_packages.install | default([]) }}'
+        - '{{ packages.install | default([]) }}'
       loop_control:
         label: Installing {{ item }}
 
     - name: Copy local packages
-      when: local_packages_installed is defined
+      when: common_packages.local is defined or packages.local is defined
       file:
         src: packages/{{ item }}
         dest: /tmp
-      loop: '{{ local_packages_installed }}'
+      with_flattened:
+        - '{{ common_packages.local | default([]) }}'
+        - '{{ packages.local | default([]) }}'
       loop_control:
         label: Copying {{ item }}
 
     - name: Install local packages
-      when: local_packages_installed is defined
+      when: common_packages.local is defined or packages.local is defined
       opkg:
         name: '/tmp/{{ item }}'
         state: present
         force: downgrade
-      loop: '{{ local_packages_installed }}'
+      with_flattened:
+        - '{{ common_packages.local | default([]) }}'
+        - '{{ packages.local | default([]) }}'
       loop_control:
         label: Installing {{ item }}
 
     - name: Cleanup copied local packages in /tmp
-      when: local_packages_installed is defined
+      when: common_packages.local is defined or packages.local is defined
       file:
         name: '/tmp/{{ item }}'
         state: absent
-      loop: '{{ local_packages_installed }}'
+      with_flattened:
+        - '{{ common_packages.local | default([]) }}'
+        - '{{ packages.local | default([]) }}'
       loop_control:
-        label: Cleaning up {{ item }}
+        label: Cleaning up /tmp/{{ item }}
+
+    - name: Pin packages
+      when: common_packages.pin is defined or packages.pin is defined
+      shell: opkg pin {{ item }}
+      with_flattened:
+        - '{{ common_packages.pin | default([]) }}'
+        - '{{ packages.pin | default([]) }}'
+      loop_control:
+        label: Pinning package {{ item }}
 
     - name: Get public IP address
       shell: wget -qO- http://ipecho.net/plain

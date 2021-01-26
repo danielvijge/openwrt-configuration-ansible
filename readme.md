@@ -67,7 +67,7 @@ IP address usually end with `.1`.
 * Set the protocol to _Static address_.
 * Set the IPv6 address to the desired first address (e.g. `10.0.0.1`).
 * Set the network mask to `255.255.255.0`
-* Set IPv6 suffix to _::1_.
+* Set IPv6 suffix to `::1`.
 * Under DHCP server > General Setup:
   * Set Start to be a little higher that the amount of router+access points. E.g.
     when using one router and two access point (total three devices), set the start

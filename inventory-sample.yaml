@@ -23,17 +23,22 @@ openwrt:
           # HTMode for the wireless radio on the 5Hz band
           radio5_htmode: VHT80
       vars:
-        # Packages that will be installed on all devices in the group routers,
-        # but not on devices on other groups
-        packages_installed:
-          - luci-app-upnp
-          - luci-app-sqm
-          - luci-proto-ipv6
-          - 6in4
-        # Additional packages stored in the `packages` folder that will be installed on
-        # all devices in the routers group
-        local_packages_installed:
-          - miniupnpd_2.1.20200510-3_mips_24kc.ipk
+        packages:
+          # Packages that will be installed on all devices in the group routers,
+          # but not on devices on other groups
+          install:
+            - luci-app-upnp
+            - luci-app-sqm
+            - luci-proto-ipv6
+            - 6in4
+          # Additional packages stored in the `packages` folder that will be installed on
+          # all devices in the routers group
+          local:
+            - miniupnpd_2.1.20200510-3_mips_24kc.ipk
+          # Packaged are pinned (can will not be automatically upgraded by opkg).
+          # Useful if a specific local version is installed
+          pin:
+            - miniupnpd
     # All the access points. There can be 0 or more access points
     aps:
       hosts:
@@ -67,9 +72,10 @@ openwrt:
             - dnsmasq
             - firewall
             - odhcpd
-          # Packages that will be removed for all devices the group aps
-          packages_removed:
-            #- sample
+          packages:
+            # Packages that will be removed for all devices the group aps
+            # remove:
+            #   - sample
   vars:
     # SSH connection settings. Use the private key in ~/.ssh/id_rsa to connect
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i ~/.ssh/id_rsa'
@@ -77,14 +83,15 @@ openwrt:
     # Don't move this to a lower level; instead use `packages_installed`
     # for packages that must be installed on devices in a group. The packages
     # installed is always common_packages_installed + packages_installed
-    common_packages_installed:
-      - wpad
-      - luci-ssl
-      - nano
-    # Packages that will be removed on all devices. Use `packages_removed`
-    # to set packages on a group level that should be removed.
-    common_packages_removed:
-      - wpad-basic
+    common_packages:
+      install:
+        - wpad
+        - luci-ssl
+        - nano
+      # Packages that will be removed on all devices. Use `packages_removed`
+      # to set packages on a group level that should be removed.
+      remove:
+        - wpad-basic
     # Network address, this would allow address from 10.0.0.1 - 10.0.0.255
     network: 10.0.0.0/24
     # Local IPv6 addresses

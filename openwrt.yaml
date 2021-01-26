@@ -84,7 +84,7 @@
 
     - name: Copy local packages
       when: common_packages.local is defined or packages.local is defined
-      file:
+      copy:
         src: packages/{{ item }}
         dest: /tmp
       with_flattened:
@@ -104,6 +104,8 @@
         - '{{ packages.local | default([]) }}'
       loop_control:
         label: Installing {{ item }}
+      register: opkg_install_local_command
+      failed_when: opkg_install_local_command.changed == false and 'root is up to date' not in opkg_install_local_command.msg
 
     - name: Cleanup copied local packages in /tmp
       when: common_packages.local is defined or packages.local is defined
@@ -123,7 +125,7 @@
         - '{{ common_packages.pin | default([]) }}'
         - '{{ packages.pin | default([]) }}'
       loop_control:
-        label: Pinning package {{ item }}
+        label: Pinning {{ item }}
 
     - name: Get public IP address
       shell: wget -qO- http://ipecho.net/plain

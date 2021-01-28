@@ -42,7 +42,7 @@
       set_fact:
         latest_version_installed: '{{ firmware | regex_findall(openwrt_version) | length | bool }}'
 
-    - name: Copy new OpenWRT firmware
+    - name: Copy new OpenWrt firmware
       when: firmware != '' and not latest_version_installed
       copy:
         src: '{{ firmware }}'

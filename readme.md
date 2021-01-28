@@ -1,6 +1,6 @@
-# OpenWRT configuration for router + dumb access points with Ansible playbook for centralised management
+# OpenWrt configuration for router + dumb access points with Ansible playbook for centralised management
 
-An OpenWRT configuration for a network with a single router and multiple
+An OpenWrt configuration for a network with a single router and multiple
 wireless access points. The network has the following characteristics:
 
 * One router, multiple _dumb access points_.
@@ -16,7 +16,7 @@ Besides a description of the setup, this repository also includes an
 Ansible playbook and inventory to centrally apply configuration changes
 to all devices and/or update the firmware version on all devices.
 
-This configuration and the Ansible playbook have been tested with OpenWRT 19.07, a TP-Link
+This configuration and the Ansible playbook have been tested with OpenWrt 19.07, a TP-Link
 Archer C7 v5 as router, and two TP-Link WDR4300 v1's as access points.
 
 ## Table of content
@@ -41,7 +41,7 @@ Remarks:
     address to the router.
   * If it cannot be avoided, the router should be configured as the DMZ for
     the modem. In addition, disable security features (such as firewall/
-    filtering) on the modem. The OpenWRT router will handle all security.
+    filtering) on the modem. The OpenWrt router will handle all security.
 
 ## Router configuration
 
@@ -191,7 +191,7 @@ This does not have to be configured because the services for dnsmasq and odhcpd 
 ## Ansible configuration
 
 Included here as well is an Ansible playbook that can (re)configure and/or update all the
-OpenWRT devices on the network. This allows for central management and common configuration
+OpenWrt devices on the network. This allows for central management and common configuration
 across all access points. The configuration when applied is as described above. However, every
 setup is unique, so the configuration files and inventory needs to be adapted to each specific
 network.
@@ -201,7 +201,7 @@ used to adapt to your network. The file `wonderland.yaml` is the inventory file 
 network. Because it contains passwords and other sensitive data, this file is encrypted.
 
 The Ansible can be used to configure a router/access point after a new installation/factory
-reset of OpenWRT, provided that:
+reset of OpenWrt, provided that:
 * The router/access point has a known IP address (either static or via DHCP).
 * An SSH key is set that allows for access from the computer running Ansible.
 
@@ -221,7 +221,7 @@ Each device needs at least the following configuration, and this cannot be moved
 
 ### Upgrading firmware (optional)
 
-Place the OpenWRT firmware images inside the _firmware_ directory. The playbook will automatically
+Place the OpenWrt firmware images inside the _firmware_ directory. The playbook will automatically
 find the newest version and flash that on a device. If there are different models in the same network,
 the firmware files can all be placed in the same directory. If in the inventory file each device (or
 group of devices) is configured with a _model_ it will select the latest firmware with the model name

@@ -79,6 +79,8 @@ openwrt:
   vars:
     # SSH connection settings. Use the private key in ~/.ssh/id_rsa to connect
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i ~/.ssh/id_rsa'
+    # Reboot after reconfiguration
+    reboot_after: yes
     # Packages that will be installed on all devices
     # Don't move this to a lower level; instead use `packages_installed`
     # for packages that must be installed on devices in a group. The packages

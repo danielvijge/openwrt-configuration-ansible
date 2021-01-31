@@ -204,9 +204,11 @@
         label: Disabling service {{ item }}
 
     - name: Reboot device
+      when: reboot_after is not defined or reboot_after
       shell: reboot
 
     - name: Wait for reboot
+      when: reboot_after is not defined or reboot_after
       wait_for_connection:
         timeout: 300
         delay: 60

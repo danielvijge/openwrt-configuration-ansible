@@ -120,7 +120,7 @@
 
     - name: Pin packages
       when: common_packages.pin is defined or packages.pin is defined
-      shell: opkg pin {{ item }}
+      shell: opkg flag hold {{ item }}
       with_flattened:
         - '{{ common_packages.pin | default([]) }}'
         - '{{ packages.pin | default([]) }}'

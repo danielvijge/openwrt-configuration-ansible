@@ -127,6 +127,28 @@
       loop_control:
         label: Pinning {{ item }}
 
+    - name: Get packages that can be upgraded
+      when: upgrade_packages is defined and upgrade_packages
+      shell: opkg list-upgradable | cut -d " " -f1
+      register: available_upgrades_command
+      check_mode: false
+
+    - name: Get packages that can be upgraded
+      when: upgrade_packages is defined and upgrade_packages
+      set_fact:
+        available_upgrades: '{{ available_upgrades_command.stdout_lines }}'
+      check_mode: false
+
+    - name: Upgrade all other packages
+      when: available_upgrades is defined
+      opkg:
+        name: '{{ item }}'
+        state: present
+      with_flattened:
+        - '{{ available_upgrades }}'
+      loop_control:
+        label: Upgrading {{ item }}
+
     - name: Get public IP address
       shell: wget -qO- http://ipecho.net/plain
       register: external_ip_command

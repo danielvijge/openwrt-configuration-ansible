@@ -81,6 +81,12 @@ openwrt:
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i ~/.ssh/id_rsa'
     # Reboot after reconfiguration
     reboot_after: yes
+    # Upgrade all other packages (not recommended, from OpenWrt documentation:
+    # Mass upgrade of all “upgradable” packages is not a good idea, as opkg only
+    # indicates that there is a newer version of the package, but does not do any
+    # further evaluation. Exceeding the flash space or failing to download all needed
+    # upgrades might brick the router.
+    upgrade_packages: no
     # Packages that will be installed on all devices
     # Don't move this to a lower level; instead use `packages_installed`
     # for packages that must be installed on devices in a group. The packages

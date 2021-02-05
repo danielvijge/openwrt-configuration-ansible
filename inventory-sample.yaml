@@ -117,6 +117,7 @@ openwrt:
     # Optionally, use Hurricane Electric/Tunnelbroker to get IPv6 if you don't have native IPv6
     # See https://tunnelbroker.net/
     henet:
+      enabled: yes
       username: username
       password: passsword
       tunnelid: 123456

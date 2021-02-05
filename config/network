@@ -54,6 +54,9 @@ config interface 'henet'
 	option ip6addr '{{ henet.ip6addr }}'
 	option tunnelid '{{ henet.tunnelid }}'
 	option password '{{ henet.password }}'
+{% if not henet.enabled %}
+  option auto '0'
+{% endif %}
 {% endif %}
 
 {% else %}

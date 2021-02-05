@@ -25,6 +25,10 @@ config queue
 	option linklayer '{{ sqm.linklayer }}'
 	option overhead '{{ sqm.overhead }}'
 	option download '{{ henet.sqm.download }}'
+{% if henet.enabled %}
 	option enabled '1'
+{% else %}
+	option enabled '0'
+{% endif %}
 	option interface '6in4-henet'
 {% endif %}

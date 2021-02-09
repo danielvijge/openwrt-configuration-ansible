@@ -143,6 +143,8 @@ openwrt:
         port: 22
         # ID/IP to forward to, this select the IP ending in .254
         to: 254
+        # Optional source IP address
+        source_ip: 123.5.123.7
       - name: myNas-HTTP
         port: 80
         to: 254

@@ -142,6 +142,9 @@ config redirect
 	option target 'DNAT'
 	option dest_ip '{{ network | ipaddr(forward.to) | ipv4('address')}}'
 	option proto 'tcp udp'
+{% if forward.source_ip is defined %}
+	option src_ip '{{ forward.source_ip }}'
+{% endif %}
 
 {% endfor %}
 {% endif %}

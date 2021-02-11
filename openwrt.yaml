@@ -141,9 +141,7 @@
 
     - name: Upgrade all other packages
       when: available_upgrades is defined
-      opkg:
-        name: '{{ item }}'
-        state: present
+      shell: opkg upgrade {{ item }}
       with_flattened:
         - '{{ available_upgrades }}'
       loop_control:

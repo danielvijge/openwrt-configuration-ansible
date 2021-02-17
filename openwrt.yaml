@@ -24,7 +24,7 @@
 
     - name: Select newest firmware image
       set_fact:
-        firmware: '{{ firmware_candidates.files | sort(attribute="ctime") | map(attribute="path") | first | default("") }}'
+        firmware: '{{ firmware_candidates.files | sort(attribute="ctime", reverse=True) | map(attribute="path") | first | default("") }}'
 
     - name: Get currently installed version
       when: firmware != ''
@@ -42,6 +42,11 @@
       set_fact:
         latest_version_installed: '{{ firmware | regex_findall(openwrt_version) | length | bool }}'
 
+    - name: Print firmware file name if firmware will be upgraded
+      when: firmware != '' and not latest_version_installed
+      debug:
+        msg: OpenWrt will be upgraded to {{ firmware }}
+
     - name: Copy new OpenWrt firmware
       when: firmware != '' and not latest_version_installed
       copy:
@@ -58,6 +63,11 @@
       wait_for_connection:
         timeout: 300
         delay: 60
+
+    - name: Ensure reboot after configuration
+      when: firmware != '' and not latest_version_installed
+      set_fact:
+        reboot_after: yes
 
     - name: Remove packages
       when: common_packages.remove is defined or packages.remove is defined

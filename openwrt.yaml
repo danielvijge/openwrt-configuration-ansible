@@ -42,10 +42,10 @@
       set_fact:
         latest_version_installed: '{{ firmware | regex_findall(openwrt_version) | length | bool }}'
 
-    - name: Print firmware file name if firmware will be upgraded
+    - name: Confirm upgrade of firmware
       when: firmware != '' and not latest_version_installed
-      debug:
-        msg: OpenWrt will be upgraded to {{ firmware }}
+      pause:
+        prompt: OpenWrt will be upgraded to {{ firmware }}. Continue?
 
     - name: Copy new OpenWrt firmware
       when: firmware != '' and not latest_version_installed

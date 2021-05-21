@@ -223,6 +223,16 @@
       loop_control:
         label: Copying {{ item.path }}/{{ item.name }}
         
+    - name: Copy additional scripts
+      copy:
+        src: 'bin/{{ item }}'
+        dest: '/usr/sbin/{{ item }}'
+        mode: 0755
+      with_items:
+        - upgrade-all-packages
+      loop_control:
+        label: Copying script to /usr/sbin/{{ item }}
+
     - name: Disable services
       when: disabled_services is defined
       service:

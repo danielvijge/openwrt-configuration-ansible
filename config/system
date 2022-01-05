@@ -18,44 +18,44 @@ config timeserver 'ntp'
 
 {% if model is defined and model == 'archer-c7-v5' %}
 config led
-	option sysfs 'tp-link:green:wan'
 	option name 'WAN'
 	option default '0'
 	option trigger 'netdev'
 	option dev 'eth0.2'
 	list mode 'tx'
 	list mode 'rx'
+	option sysfs 'green:wan'
 
 config led
-	option sysfs 'tp-link:green:lan1'
 	option default '0'
 	option trigger 'switch0'
 	option port_mask '0x04'
 	option name 'LAN1'
 	option speed_mask '0x0E'
+	option sysfs 'green:lan1'
 
 config led
-	option sysfs 'tp-link:green:lan2'
 	option default '0'
 	option trigger 'switch0'
 	option port_mask '0x08'
 	option name 'LAN2'
 	option speed_mask '0x0E'
+	option sysfs 'green:lan2'
 
 config led
-	option sysfs 'tp-link:green:lan3'
 	option default '0'
 	option trigger 'switch0'
 	option port_mask '0x10'
 	option name 'LAN3'
 	option speed_mask '0x0E'
+	option sysfs 'green:lan3'
 
 config led
 	option default '0'
 	option trigger 'switch0'
 	option name 'LAN4'
-	option sysfs 'tp-link:green:lan4'
 	option port_mask '0x12'
 	option speed_mask '0x0E'
+	option sysfs 'green:lan4'
 {% endif %}
 

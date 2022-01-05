@@ -1,6 +1,6 @@
 
 config interface 'loopback'
-	option ifname 'lo'
+	option device 'lo'
 	option proto 'static'
 	option ipaddr '127.0.0.1'
 	option netmask '255.0.0.0'
@@ -17,10 +17,14 @@ config switch
 	option reset '1'
 	option enable_vlan '1'
 
+config device
+  option name 'br-lan'
+  option type 'bridge'
+  list ports 'eth0.1'
+
 {% if inventory_hostname in groups['routers'] %}
 config interface 'lan'
-	option type 'bridge'
-	option ifname 'eth0.1'
+	option device 'br-lan'
 	option proto 'static'
 	option netmask '{{ network | ipaddr('netmask') }}'
 	option ip6assign '60'
@@ -34,6 +38,8 @@ config interface 'wan'
 config interface 'wan6'
 	option ifname 'eth0.2'
 	option proto 'dhcpv6'
+	option reqaddress 'try'
+	option reqprefix 'auto'
 
 config switch_vlan
 	option device 'switch0'
@@ -61,8 +67,7 @@ config interface 'henet'
 
 {% else %}
 config interface 'lan'
-	option type 'bridge'
-	option ifname 'eth0.1'
+	option device 'br-lan'
 	option proto 'dhcp'
 
 config switch_vlan
@@ -75,6 +80,6 @@ config interface 'lan6'
 	option proto 'dhcpv6'
 	option reqaddress 'try'
 	option reqprefix 'no'
-	option ifname '@lan'
+	option device '@lan'
 
 {% endif %}

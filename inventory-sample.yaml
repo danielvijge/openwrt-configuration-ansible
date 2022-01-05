@@ -93,13 +93,13 @@ openwrt:
     # installed is always common_packages_installed + packages_installed
     common_packages:
       install:
-        - wpad
+        - wpad-wolfssl
         - luci-ssl
         - nano
       # Packages that will be removed on all devices. Use `packages_removed`
       # to set packages on a group level that should be removed.
       remove:
-        - wpad-basic
+        - wpad-basic-wolfssl
     # Network address, this would allow address from 10.0.0.1 - 10.0.0.255
     network: 10.0.0.0/24
     # Local domain name

@@ -112,6 +112,12 @@ openwrt:
     passphrase: mypassword
     # SSH password of the root user
     ssh_password: rootpassword
+    # Optional additional wireless networks, such as a guest or IoT network
+    additional_wireless_networks:
+      - SSID: my-lan-guest
+        passphrase: mypassword
+        # Optionally enable client isolation for guest/IoT network
+        client_isolation: true
     # Physical address of the wireless radios. Move lower if using different model, with different settings
     # per model
     radio2_path: platform/ahb/18100000.wmac

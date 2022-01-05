@@ -1,0 +1,77 @@
+- hosts: routers
+  connection: local
+  user: root
+  become: no
+  gather_facts: no
+  serial: 1
+  ignore_unreachable: true
+  vars:
+    aps: "{{ groups['aps'] }}"
+
+  tasks:
+
+    - name: Get public IP address
+      shell: wget -qO- http://ipecho.net/plain
+      register: external_ip_command
+      check_mode: false
+
+    - name: Set variable for public IP address
+      set_fact:
+        external_ip: '{{ external_ip_command.stdout_lines[0] }}'
+
+    - name: Hash password
+      delegate_to: localhost
+      become: no
+      shell: openssl passwd -salt 'YRNxiMTL' -1 '{{ ssh_password }}'
+      register: ssh_password_hashed_command
+      check_mode: false
+
+    - name: Set variable for hashed password
+      set_fact:
+        ssh_password_hashed: '{{ ssh_password_hashed_command.stdout_lines[0] }}'
+
+    - name: Copy configuration
+      template:
+        src: 'config/{{ item.name }}'
+        dest: '{{ item.path }}/{{ item.name }}'
+      with_items:
+        - name: authorized_keys
+          path: etc/dropbear
+        - name: dhcp
+          path: etc/config
+        - name: dnsmasq.conf
+          path: etc
+        - name: ethers
+          path: etc
+        - name: firewall
+          path: etc/config
+        - name: luci
+          path: etc/config
+        - name: network
+          path: etc/config
+        - name: shadow
+          path: etc
+        - name: sqm
+          path: etc/config
+        - name: system
+          path: etc/config
+        - name: uhttpd
+          path: etc/config
+        - name: upnpd
+          path: etc/config
+        - name: wireless
+          path: etc/config
+      loop_control:
+        label: Copying {{ item.path }}/{{ item.name }}
+
+    - name: Copy configuration (binary files)
+      copy:
+        src: 'config/{{ item.name }}'
+        dest: '{{ item.path }}/{{ item.name }}'
+      with_items:
+        - name: uhttpd.crt
+          path: etc
+        - name: uhttpd.key
+          path: etc
+      loop_control:
+        label: Copying {{ item.path }}/{{ item.name }}

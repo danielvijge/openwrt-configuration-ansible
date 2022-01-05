@@ -32,11 +32,11 @@ config interface 'lan'
 	option ip6ifaceid '::{{ id }}'
 
 config interface 'wan'
-	option ifname 'eth0.2'
+	option device 'eth0.300'
 	option proto 'dhcp'
 
 config interface 'wan6'
-	option ifname 'eth0.2'
+	option device 'eth0.300'
 	option proto 'dhcpv6'
 	option reqaddress 'try'
 	option reqprefix 'auto'
@@ -44,12 +44,29 @@ config interface 'wan6'
 config switch_vlan
 	option device 'switch0'
 	option vlan '1'
-	option ports '2 3 4 5 0t'
+	option ports '0t 2 3 4 5'
+	option vid '1'
 
 config switch_vlan
 	option device 'switch0'
 	option vlan '2'
-	option ports '1 0t'
+	option ports '0t 1t'
+	option vid '100'
+	option description 'Management'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '3'
+	option ports '0t 1t'
+	option vid '300'
+	option description 'Internet'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '4'
+	option ports '0t 1t'
+	option vid '640'
+	option description 'Television'
 
 {% if henet is defined %}
 config interface 'henet'

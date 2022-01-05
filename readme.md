@@ -11,13 +11,17 @@ wireless access points. The network has the following characteristics:
 * A wired connection to a computer can be attached to the router or each access point.
 * As much as possible rely on DHCP, no static IP addresses.
 * Each device can use its Internet port to connect upstream, all other LAN ports remain available.
+* Support for multiple wireless networks, such as a guest or IoT network.
 
 Besides a description of the setup, this repository also includes an
 Ansible playbook and inventory to centrally apply configuration changes
 to all devices and/or update the firmware version on all devices.
 
-This configuration and the Ansible playbook have been tested with OpenWrt 19.07, a TP-Link
+This configuration and the Ansible playbook have been tested with OpenWrt 19.07 and 21.02, a TP-Link
 Archer C7 v5 as router, and two TP-Link WDR4300 v1's as access points.
+
+The main branch is based on OpenWrt 21.02. The _openwrt-19.07_ branch contains the previous
+configuration for 19.07.
 
 ## Table of content
 
@@ -50,8 +54,8 @@ things can be configured as desired.
 
 ### Packages
 
-* Remove the package _wpad-basic_.
-* Install the package _wpad_.
+* Remove the package _wpad-basic-wolfssl_.
+* Install the package _wpad-wolfssl_.
 
 ### System
 
@@ -107,8 +111,8 @@ settings are:
 
 ### DHCP and DNS
 
-* Set Local server to _/network-name/_ (use the same name as the wireless SSID).
-* Set Local domain to _network-name_.
+* Set Local server to _/home/_.
+* Set Local domain to _home_.
 
 All access points use DHCP instead of static addresses. This allows for a more flexible
 setup, and easy configuration is case something fails. Because each access point uses
@@ -124,7 +128,7 @@ configured with DHCP, a lot of the fields can be selected from the list.
 
 * Under Static leases, give a static IP to each access point.
   * Set the Hostname for each access point. Access points will be available as
-    `http://ap-hostname.network-name`. This should be the same name 
+    `http://ap-hostname.home`. This should be the same name 
   * Set/Select the Mac-Address of each access point.
   * Set the IPv4-Address of each access point (type the address instead of selecting it
     from the list, e.g. `10.0.0.2`).
@@ -137,8 +141,8 @@ Each access point is configured in the same way.
 
 ### Packages
 
-* Remove the package _wpad-basic_.
-* Install the package _wpad_.
+* Remove the package _wpad-basic-wolfssl_.
+* Install the package _wpad-wolfssl_.
 
 ### System
 
@@ -196,8 +200,8 @@ across all access points. The configuration when applied is as described above. 
 setup is unique, so the configuration files and inventory needs to be adapted to each specific
 network.
 
-Most settings can be changed from the `inventory.yaml` file. There is a sample file that can be
-used to adapt to your network. The file `wonderland.yaml` is the inventory file for my local
+Most settings can be changed from the `inventory-sample.yaml` file. There is a sample file that can be
+used to adapt to your network. The file `home.yaml` is the inventory file for my local
 network. Because it contains passwords and other sensitive data, this file is encrypted.
 
 The Ansible can be used to configure a router/access point after a new installation/factory
@@ -218,6 +222,31 @@ Each device needs at least the following configuration, and this cannot be moved
 * mac: MAC address of the Internet port of the device (or the port that is connected to the upstream
   device; modem/router/other access point).
 * id: unique numerical id, used to calculate the IP address for the device
+
+### SSL certificate
+
+If you want to access the Luci interface via HTTPS you need to include include an SSL certificate.
+This can be generated with the following commands:
+
+1. Generate a root certificate:
+```
+openssl genrsa -out rootCA.key 4096
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 3650 -subj "/C=NL/O=home/CN=home Root Certificate" -out rootCA.crt
+```
+This root certificate can be installed in a browser, so the Luci certificate is accepted.
+
+2. Generate a certificate for the router and access points:
+```
+openssl genrsa -out router.key 4096
+openssl req -new -sha256 -key router.key -subj "/C=NL/O=home/CN=router.home" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "\n[SAN]\nsubjectAltName=DNS:router.home,IP:10.0.0.1,DNS:ap1.home,IP:10.0.0.2,DNS:ap2.home,IP:10.0.0.3")) -out router.csr
+openssl x509 -req -in router.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out router.crt -days 730 -sha256 -extfile <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:router.home,IP:10.0.0.1,DNS:ap1.home,IP:10.0.0.2,DNS:ap2.home,IP:10.0.0.3")) -extensions SAN
+openssl x509 -in router.crt -outform DER -out uhttpd.crt
+openssl rsa -in router.key -outform DER -out uhttpd.key
+```
+Place the files _uhttpd.crt_ and _uhttpd.key_ in the _config_ directory and they are automatically installed
+on the router and each accesspoint. The certificate in this example is valid for the main router and access
+points _ap1.home_ and _ap2.home_. If you have more access points, changed the names, or are using a different
+IP range, change the command to generate the certificate to match your settings.
 
 ### Upgrading firmware (optional)
 

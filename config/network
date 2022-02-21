@@ -18,9 +18,10 @@ config switch
 	option enable_vlan '1'
 
 config device
-  option name 'br-lan'
-  option type 'bridge'
-  list ports 'eth0.1'
+	option name 'br-lan'
+	option type 'bridge'
+	list ports 'eth0.1'
+	option igmp_snooping '1'
 
 {% if inventory_hostname in groups['routers'] %}
 config interface 'lan'
@@ -78,7 +79,7 @@ config interface 'henet'
 	option tunnelid '{{ henet.tunnelid }}'
 	option password '{{ henet.password }}'
 {% if not henet.enabled %}
-  option auto '0'
+	option auto '0'
 {% endif %}
 {% endif %}
 

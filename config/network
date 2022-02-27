@@ -21,7 +21,6 @@ config device
 	option name 'br-lan'
 	option type 'bridge'
 	list ports 'eth0.1'
-	option igmp_snooping '1'
 
 {% if inventory_hostname in groups['routers'] %}
 config interface 'lan'

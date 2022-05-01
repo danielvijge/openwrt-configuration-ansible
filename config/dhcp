@@ -35,7 +35,7 @@ config odhcpd 'odhcpd'
 config host
 	option mac '{{ hostvars[ap].mac }}'
 	option dns '1'
-	option ip '{{ network | ipaddr(hostvars[ap].id) | ipv4('address')}}'
+	option ip '{{ network | ansible.utils.ipaddr(hostvars[ap].id) | ansible.utils.ipv4('address')}}'
 	option name '{{ hostvars[ap].name }}'
 	option hostid '{{ hostvars[ap].id }}'
 	option duid '{{ hostvars[ap].duid }}'
@@ -47,7 +47,7 @@ config host
 	option name '{{ host.name }}'
 	option mac '{{ host.mac }}'
 	option dns '1'
-	option ip '{{ network | ipaddr(host.id) | ipv4('address')}}'
+	option ip '{{ network | ansible.utils.ipaddr(host.id) | ansible.utils.ipv4('address')}}'
 	option hostid '{{ host.id }}'
 	option duid '{{ host.duid }}'
 	

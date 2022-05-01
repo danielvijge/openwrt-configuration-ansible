@@ -26,9 +26,9 @@ config device
 config interface 'lan'
 	option device 'br-lan'
 	option proto 'static'
-	option netmask '{{ network | ipaddr('netmask') }}'
+	option netmask '{{ network | ansible.utils.ipaddr('netmask') }}'
 	option ip6assign '60'
-	option ipaddr '{{ network | ipaddr(id) | ipv4('address')}}'
+	option ipaddr '{{ network | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
 	option ip6ifaceid '::{{ id }}'
 
 config interface 'wan'

@@ -140,7 +140,7 @@ config redirect
 	option dest 'lan'
 	option dest_port '{{ forward.port }}'
 	option target 'DNAT'
-	option dest_ip '{{ network | ipaddr(forward.to) | ipv4('address')}}'
+	option dest_ip '{{ network | ansible.utils.ipaddr(forward.to) | ansible.utils.ipv4('address')}}'
 	option proto 'tcp udp'
 {% if forward.source_ip is defined %}
 	option src_ip '{{ forward.source_ip }}'

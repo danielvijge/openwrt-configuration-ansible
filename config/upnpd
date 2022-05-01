@@ -9,7 +9,7 @@ config upnpd 'config'
 	option enabled '1'
 	option uuid '3a87f98a-ad33-4311-8055-4ed3532da4ed'
 	option external_ip '{{ external_ip }}'
-	option presentation_url 'http://{{ network | ipaddr(id) | ipv4('address')}}'
+	option presentation_url 'http://{{ network | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
 
 config perm_rule
 	option action 'allow'

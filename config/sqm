@@ -10,25 +10,6 @@ config queue 'eth1'
 	option overhead '{{ sqm.overhead }}'
 	option download '{{ sqm.download }}'
 	option upload '{{ sqm.upload }}'
-	option interface 'eth0.2'
+	option interface 'eth0'
 	option enabled '1'
-{% endif %}
-
-{% if henet is defined and sqm is defined %}
-config queue
-	option debug_logging '0'
-	option verbosity '5'
-	option upload '{{ henet.sqm.upload }}'
-	option qdisc 'cake'
-	option script 'piece_of_cake.qos'
-	option qdisc_advanced '0'
-	option linklayer '{{ sqm.linklayer }}'
-	option overhead '{{ sqm.overhead }}'
-	option download '{{ henet.sqm.download }}'
-{% if henet.enabled %}
-	option enabled '1'
-{% else %}
-	option enabled '0'
-{% endif %}
-	option interface '6in4-henet'
 {% endif %}

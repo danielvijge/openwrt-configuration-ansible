@@ -32,6 +32,7 @@ openwrt:
             - luci-app-dawn
             - luci-proto-ipv6
             - 6in4
+            - 6to4
           # Additional packages stored in the `packages` folder that will be installed on
           # all devices in the routers group
           local:
@@ -142,6 +143,9 @@ openwrt:
       sqm:
         download: 16000
         upload: 2300
+    # Enable 6to4 config for IPv6 transition (if no native IPv6 is available)
+    ipv6_6to4:
+      enabled: yes
     # MAC addresses that should be blocked from WiFi access
     blocked_mac_addresses_on_wifi:
       - A6:00:55:27:4B:75

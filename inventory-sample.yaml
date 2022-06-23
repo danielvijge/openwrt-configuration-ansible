@@ -29,6 +29,7 @@ openwrt:
           install:
             - luci-app-upnp
             - luci-app-sqm
+            - luci-app-dawn
             - luci-proto-ipv6
             - 6in4
           # Additional packages stored in the `packages` folder that will be installed on

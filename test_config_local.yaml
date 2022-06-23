@@ -61,6 +61,8 @@
           path: etc/config
         - name: wireless
           path: etc/config
+        - name: dawn
+          path: etc/config
       loop_control:
         label: Copying {{ item.path }}/{{ item.name }}
 

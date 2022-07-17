@@ -11,7 +11,7 @@ config zone
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'ACCEPT'
-	option network 'lan'
+	list network 'lan'
 
 config zone
 	option name 'wan'
@@ -20,7 +20,14 @@ config zone
 	option mtu_fix '1'
 	option input 'REJECT'
 	option forward 'REJECT'
-	option network 'wan wan6 henet{% if ipv6_6to4 is defined and ipv6_6to4.enabled %} wan6to4{% endif %}'
+	list network 'wan'
+	list network 'wan6'
+{% if henet is defined %}
+	list network 'henet'
+{% endif %}
+{% if ipv6_6to4 is defined and ipv6_6to4.enabled %}
+	list network 'wan6to4'
+{% endif %}
 
 config forwarding
 	option src 'lan'

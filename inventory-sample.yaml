@@ -114,12 +114,16 @@ openwrt:
     passphrase: mypassword
     # SSH password of the root user
     ssh_password: rootpassword
+    # Type of encryption, like 'psk2' (WPA2) or 'sae-mixed' (WPA2/WPA3)
+    encryption: sea-mixed
     # Optional additional wireless networks, such as a guest or IoT network
     additional_wireless_networks:
       - SSID: my-lan-guest
         passphrase: mypassword
         # Optionally enable client isolation for guest/IoT network
         client_isolation: true
+        # Optionally set encryption, defaults to psk2 (WPA2)
+        encryption: psk2
     # Physical address of the wireless radios. Move lower if using different model, with different settings
     # per model
     radio2_path: platform/ahb/18100000.wmac

@@ -69,8 +69,18 @@
       set_fact:
         reboot_after: yes
 
+    - name: Get a list of all installed packages
+      shell: opkg list-installed | cut -d " " -f1
+      register: installed_packages_command
+      check_mode: false
+
+    - name: Get a list of all installed packages
+      set_fact:
+        installed_packages: '{{ installed_packages_command.stdout_lines }}'
+      check_mode: false
+
     - name: Remove packages
-      when: common_packages.remove is defined or packages.remove is defined
+      when: (common_packages.remove is defined or packages.remove is defined) and item in installed_packages
       opkg:
         name: '{{ item }}'
         state: absent
@@ -81,7 +91,7 @@
         label: Removing {{ item }}
     
     - name: Install packages
-      when: common_packages.install is defined or packages.install is defined
+      when: (common_packages.install is defined or packages.install is defined) and item not in installed_packages
       opkg:
         name: '{{ item }}'
         state: present

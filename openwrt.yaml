@@ -118,14 +118,14 @@
       opkg:
         name: '/tmp/{{ item }}'
         state: present
-        force: downgrade
+        force: reinstall
       with_flattened:
         - '{{ common_packages.local | default([]) }}'
         - '{{ packages.local | default([]) }}'
       loop_control:
         label: Installing {{ item }}
       register: opkg_install_local_command
-      failed_when: opkg_install_local_command.changed == false and 'root is up to date' not in opkg_install_local_command.msg
+      failed_when: '"Installing " not in opkg_install_local_command.msg'
 
     - name: Cleanup copied local packages in /tmp
       when: common_packages.local is defined or packages.local is defined

@@ -98,6 +98,7 @@ openwrt:
         - wpad-wolfssl
         - luci-ssl
         - nano
+        - fping
       # Packages that will be removed on all devices. Use `packages_removed`
       # to set packages on a group level that should be removed.
       remove:

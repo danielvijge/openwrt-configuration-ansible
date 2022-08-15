@@ -1,0 +1,1 @@
+*/15 * * * * fping --count 3 --period 2000 --random --generate --quiet {{ network }} >/dev/null 2>&1

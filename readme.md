@@ -17,11 +17,13 @@ Besides a description of the setup, this repository also includes an
 Ansible playbook and inventory to centrally apply configuration changes
 to all devices and/or update the firmware version on all devices.
 
-This configuration and the Ansible playbook have been tested with OpenWrt 19.07 and 21.02, a TP-Link
-Archer C7 v5 as router, and two TP-Link WDR4300 v1's as access points.
+This configuration and the Ansible playbook have been tested with OpenWrt 22.03, 21.02, and 19.07.
+It has at least been tested on TP-Link Archer C7-v5 and TP-Link WDR4300 v1, but in theory any
+router supported by OpenWrt should work.
 
-The main branch is based on OpenWrt 21.02. The _openwrt-19.07_ branch contains the previous
-configuration for 19.07.
+The main branch is based on OpenWrt 22.03. The branches _openwrt-22.02_ and _openwrt-19.07_ contains
+the previous configurations for 22.02 and 19.07 respectively. A lot of improvements from later version
+could be backported to older version, if desired.
 
 ## Table of content
 
@@ -43,6 +45,7 @@ Remarks:
   * Router and modem are the same device.
   * Modem can be configured in bridge mode, directly assigning the public IP
     address to the router.
+  * The router is connected to an NT device (e.g. fibre).
   * If it cannot be avoided, the router should be configured as the DMZ for
     the modem. In addition, disable security features (such as firewall/
     filtering) on the modem. The OpenWrt router will handle all security.
@@ -55,7 +58,7 @@ things can be configured as desired.
 ### Packages
 
 * Remove the package _wpad-basic-wolfssl_.
-* Install the package _wpad-wolfssl_.
+* Install the packages _wpad-wolfssl_ and _luci-app-dawn_.
 
 ### System
 
@@ -65,11 +68,11 @@ Set a Hostname for the router, e.g. _router_.
 
 **LAN**
 
-The LAN had the only static IP configuration. Because this is the main router, the
+The LAN has the only static IP configuration. Because this is the main router, the
 IP address usually end with `.1`.
 
 * Set the protocol to _Static address_.
-* Set the IPv6 address to the desired first address (e.g. `10.0.0.1`).
+* Set the IPv4 address to the desired first address (e.g. `10.0.0.1`).
 * Set the network mask to `255.255.255.0`
 * Set IPv6 suffix to `::1`.
 * Under DHCP server > General Setup:
@@ -80,7 +83,7 @@ IP address usually end with `.1`.
   * Set Router-Advertisement-Service to _server mode_.
   * Set DHCPv6-Service to _server mode_.
   * Set NDP Proxy to _disabled_.
-  * Set DHCPv6-Mode to _stateless + stateful_.
+  * Set SLAAC to _enabled_.
 
 **WAN**
 
@@ -98,16 +101,9 @@ settings are:
 * Set the mode to _Access point_.
 * Set ESSID to the desired network name.
 * Under Wireless Security:
-  * Set Encryption to _WPA2-PSK (strong security)_.
+  * Set the desired encryption level.
   * Set a wireless passphrase in Key.
   * Enable 802.11r Fast Transition.
-  * Set the NAS ID to a unique name per device-channel. For example, use hostname-band:
-    * On the router on the 2.4GHz band use _router-2_.
-    * On the router on the 5GHz band use _router-5_.
-    * On the first access point on the 2.4GHz band use _ap1-2_.
-    * On the second access point on the 5GHz band use _ap2-5_.
-  * Set the Mobility Domain to _4f57_ (or anything other, but needs to be the same
-    across all devices and bands).
 
 ### DHCP and DNS
 
@@ -130,7 +126,7 @@ configured with DHCP, a lot of the fields can be selected from the list.
   * Set the Hostname for each access point. Access points will be available as
     `http://ap-hostname.home`. This should be the same name 
   * Set/Select the Mac-Address of each access point.
-  * Set the IPv4-Address of each access point (type the address instead of selecting it
+  * Set the IPv4 Address of each access point (type the address instead of selecting it
     from the list, e.g. `10.0.0.2`).
   * Set/Select the DUID of each access point.
   * Set the IPv6-Suffix of each access point.
@@ -142,7 +138,7 @@ Each access point is configured in the same way.
 ### Packages
 
 * Remove the package _wpad-basic-wolfssl_.
-* Install the package _wpad-wolfssl_.
+* Install the package _wpad-wolfssl_ and _dawn_.
 
 ### System
 
@@ -157,8 +153,8 @@ Disable the services _dnsmasq_, _firewall_, _odhcpd_.
 
 If the device has switch functionality, this has to be changed. Normally this creates
 separate VLANs between the Internet port and the LAN ports. Because the router and all
-access points act as one network, this is not needed. It also allows to connect the access'
-point Internet port to the router's LAN port. All LAN ports of the access points can be used
+access points act as one network, this is not needed. It also allows to connect the access
+point's Internet port to the router's LAN port. All LAN ports of the access points can be used
 as well to connect other devices (including other access points.)
 
 If there are multiple VLANs on one switch, delete all accept the first one. For the one remaining
@@ -171,7 +167,7 @@ Delete the WAN and WAN6 interfaces.
 **LAN**
 
 * Set the protocol to _DHCP client_.
-* Under Physical Settings make use _Bridge interfaces_ is selected, and the Interfaces
+* Under Physical Settings make sure _Bridge interfaces_ is selected, and the Interfaces
   are set to _eth0.1,wlan0,wlan1_.
 
 **LAN6**
@@ -180,13 +176,12 @@ Create a new interface with the name LAN6.
 
 * Set the protocol to _DHCPv6 client_.
 * Under Physical Settings make use _Bridge interfaces_ is **not** selected.
-* Set Interfaces to _@lan_ (type the name, it does not appear in the list). This creates LAN6
-  as an alias of the LAN interface. It ensures that each access point can also fully use IPv6. 
+* Set Interfaces to _@lan_. This creates LAN6 as an alias of the LAN interface.
+  It ensures that each access point can also fully use IPv6. 
 
 ### Wireless
 
-Use the exact same configuration as for the router. Use a unique name for each device-band as the
-NAS ID.
+Use the exact same configuration as for the router.
 
 ### DHCP and DNS
 
@@ -204,7 +199,7 @@ Most settings can be changed from the `inventory-sample.yaml` file. There is a s
 used to adapt to your network. The file `home.yaml` is the inventory file for my local
 network. Because it contains passwords and other sensitive data, this file is encrypted.
 
-The Ansible can be used to configure a router/access point after a new installation/factory
+The Ansible playbook can be used to configure a router/access point after a new installation/factory
 reset of OpenWrt, provided that:
 * The router/access point has a known IP address (either static or via DHCP).
 * An SSH key is set that allows for access from the computer running Ansible.

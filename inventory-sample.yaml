@@ -106,7 +106,7 @@ openwrt:
     # Network address, this would allow address from 10.0.0.1 - 10.0.0.255
     network: 10.0.0.0/24
     # Local domain name
-    local_domain: home
+    local_domain: home.arpa
     # Local IPv6 addresses
     ula_prefix: fd54:28cd:b1c3::/48
     # Name of the wireless network

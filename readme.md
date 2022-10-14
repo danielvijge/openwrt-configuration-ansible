@@ -107,8 +107,8 @@ settings are:
 
 ### DHCP and DNS
 
-* Set Local server to _/home/_.
-* Set Local domain to _home_.
+* Set Local server to _/home.arpa/_.
+* Set Local domain to _home.arpa_.
 
 All access points use DHCP instead of static addresses. This allows for a more flexible
 setup, and easy configuration is case something fails. Because each access point uses
@@ -124,7 +124,7 @@ configured with DHCP, a lot of the fields can be selected from the list.
 
 * Under Static leases, give a static IP to each access point.
   * Set the Hostname for each access point. Access points will be available as
-    `http://ap-hostname.home`. This should be the same name 
+    `https://ap-hostname.home.arpa`. This should be the same name 
   * Set/Select the Mac-Address of each access point.
   * Set the IPv4 Address of each access point (type the address instead of selecting it
     from the list, e.g. `10.0.0.2`).
@@ -226,21 +226,21 @@ This can be generated with the following commands:
 1. Generate a root certificate:
 ```
 openssl genrsa -out rootCA.key 4096
-openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 3650 -subj "/C=NL/O=home/CN=home Root Certificate" -out rootCA.crt
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 3650 -subj "/C=NL/O=home/CN=home.arpa Root Certificate" -out rootCA.crt
 ```
 This root certificate can be installed in a browser, so the Luci certificate is accepted.
 
 2. Generate a certificate for the router and access points:
 ```
 openssl genrsa -out router.key 4096
-openssl req -new -sha256 -key router.key -subj "/C=NL/O=home/CN=router.home" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "\n[SAN]\nsubjectAltName=DNS:router.home,IP:10.0.0.1,DNS:ap1.home,IP:10.0.0.2,DNS:ap2.home,IP:10.0.0.3")) -out router.csr
-openssl x509 -req -in router.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out router.crt -days 730 -sha256 -extfile <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:router.home,IP:10.0.0.1,DNS:ap1.home,IP:10.0.0.2,DNS:ap2.home,IP:10.0.0.3")) -extensions SAN
+openssl req -new -sha256 -key router.key -subj "/C=NL/O=home/CN=router.home.arpa" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "\n[SAN]\nsubjectAltName=DNS:router.home.arpa,IP:10.0.0.1,DNS:ap1.home.arpa,IP:10.0.0.2,DNS:ap2.home.arpa,IP:10.0.0.3")) -out router.csr
+openssl x509 -req -in router.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out router.crt -days 730 -sha256 -extfile <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:router.home.arpa,IP:10.0.0.1,DNS:ap1.home.arpa,IP:10.0.0.2,DNS:ap2.home.arpa,IP:10.0.0.3")) -extensions SAN
 openssl x509 -in router.crt -outform DER -out uhttpd.crt
 openssl rsa -in router.key -outform DER -out uhttpd.key
 ```
 Place the files _uhttpd.crt_ and _uhttpd.key_ in the _config_ directory and they are automatically installed
 on the router and each accesspoint. The certificate in this example is valid for the main router and access
-points _ap1.home_ and _ap2.home_. If you have more access points, changed the names, or are using a different
+points _ap1.home.arpa_ and _ap2.home.arpa_. If you have more access points, changed the names, or are using a different
 IP range, change the command to generate the certificate to match your settings.
 
 ### Upgrading firmware (optional)

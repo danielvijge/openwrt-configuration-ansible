@@ -198,3 +198,9 @@ openwrt:
       upload: 2300
       linklayer: ethernet
       overhead: 22
+    # Configure miniupnpd with external IP if router's IP address is different from
+    # the external IP address (i.e. additional modem between router and Internet, and not
+    # in bridge mode). When set to true, the external IP address will be automatically
+    # retrieved.
+    upnp:
+      configure_with_external_ip: false

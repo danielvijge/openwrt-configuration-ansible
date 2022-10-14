@@ -8,7 +8,9 @@ config upnpd 'config'
 	option igdv1 '1'
 	option enabled '1'
 	option uuid '3a87f98a-ad33-4311-8055-4ed3532da4ed'
+{% if upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip %}
 	option external_ip '{{ external_ip }}'
+{% endif %}
 	option presentation_url 'http://{{ network | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
 
 config perm_rule

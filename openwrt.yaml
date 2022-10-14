@@ -168,11 +168,13 @@
         label: Upgrading {{ item }}
 
     - name: Get public IP address
+      when: upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip
       shell: wget -qO- http://ipecho.net/plain
       register: external_ip_command
       check_mode: false
 
     - name: Set variable for public IP address
+      when: upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip
       set_fact:
         external_ip: '{{ external_ip_command.stdout_lines[0] }}'
 

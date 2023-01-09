@@ -236,7 +236,7 @@
           path: /etc/crontab
           filename: root
       loop_control:
-        label: Copying {{ item.path }}/{{ item.name }}
+        label: Copying {{ item.path }}/{{ item.filename | default(item.name) }}
 
     - name: Copy configuration (binary files)
       copy:

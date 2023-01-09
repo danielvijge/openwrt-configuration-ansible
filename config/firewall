@@ -138,12 +138,13 @@ config rule
 
 config include
 	option path '/etc/firewall.user'
+	option fw4_compatible 1
 
+{% if inventory_hostname in groups['routers'] %}
 config include 'miniupnpd'
 	option type 'script'
 	option path '/usr/share/miniupnpd/firewall.include'
-	option family 'any'
-	option reload '1'
+{% endif %}
 
 {% if port_forwards is defined %}
 {% for forward in port_forwards %}

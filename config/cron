@@ -1,1 +1,4 @@
 */15 * * * * fping --count 3 --period 2000 --random --generate --quiet {{ network }} >/dev/null 2>&1
+{% if inventory_hostname in groups['routers'] %}
+0 4 * * * nft flush chain inet fw4 upnp_forward && nft flush chain inet fw4 upnp_prerouting
+{% endif %}

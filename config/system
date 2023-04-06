@@ -20,10 +20,16 @@ config timeserver 'ntp'
 config led
 	option name 'WAN'
 	option default '0'
+{% if inventory_hostname in groups['routers'] %}
 	option trigger 'netdev'
 	option dev 'eth0.2'
 	list mode 'tx'
 	list mode 'rx'
+{% else %}
+	option trigger 'switch0'
+	option port_mask '0x02'
+	option speed_mask '0x0E'
+{% endif %}
 	option sysfs 'green:wan'
 
 config led
@@ -54,7 +60,7 @@ config led
 	option default '0'
 	option trigger 'switch0'
 	option name 'LAN4'
-	option port_mask '0x12'
+	option port_mask '0x20'
 	option speed_mask '0x0E'
 	option sysfs 'green:lan4'
 {% endif %}

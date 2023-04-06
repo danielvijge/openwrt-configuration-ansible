@@ -25,7 +25,7 @@ config zone
 {% if henet is defined %}
 	list network 'henet'
 {% endif %}
-{% if ipv6_6to4 is defined and ipv6_6to4.enabled %}
+{% if ipv6_6to4 is defined %}
 	list network 'wan6to4'
 {% endif %}
 
@@ -128,7 +128,7 @@ config rule
 	option proto 'udp'
 	option target 'ACCEPT'
 
-{% if ipv6_6to4 is defined and ipv6_6to4.enabled %}
+{% if ipv6_6to4 is defined %}
 config rule
 	option target 'ACCEPT' 
 	option name '6to4' 

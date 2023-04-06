@@ -68,9 +68,12 @@ config switch_vlan
 	option vid '640'
 	option description 'Television'
 
-{% if ipv6_6to4 is defined and ipv6_6to4.enabled %}
+{% if ipv6_6to4 is defined %}
 config interface 'wan6to4'
 	option proto '6to4'
+{% if not ipv6_6to4.enabled %}
+	option auto '0'
+{% endif %}
 {% endif %}
 
 {% if henet is defined %}

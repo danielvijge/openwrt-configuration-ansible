@@ -1,4 +1,4 @@
-- hosts: routers
+- hosts: openwrt
   connection: local
   user: root
   become: no

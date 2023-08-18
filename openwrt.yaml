@@ -240,7 +240,7 @@
 
     - name: Copy configuration (binary files)
       copy:
-        src: 'config/{{ item.name }}'
+        src: 'certs/{{ item.name }}'
         dest: '{{ item.path }}/{{ item.name }}'
       with_items:
         - name: uhttpd.crt

@@ -1,5 +1,0 @@
-home.yaml filter=git-crypt diff=git-crypt
-config/uhttpd.* filter=git-crypt diff=git-crypt
-
-# Making sure that .gitattributes is never encrypted. DON'T TOUCH THAT LINE AND ONE BELOW
-.gitattributes !filter !diff

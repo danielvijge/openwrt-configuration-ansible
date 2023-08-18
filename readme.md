@@ -229,6 +229,7 @@ openssl genrsa -out rootCA.key 4096
 openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 3650 -subj "/C=NL/O=home/CN=home.arpa Root Certificate" -out rootCA.crt
 ```
 This root certificate can be installed in a browser, so the Luci certificate is accepted.
+The root certificate for the example certificates is included in `certs/rootCA.crt`.
 
 2. Generate a certificate for the router and access points:
 ```
@@ -238,10 +239,9 @@ openssl x509 -req -in router.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateseria
 openssl x509 -in router.crt -outform DER -out uhttpd.crt
 openssl rsa -in router.key -outform DER -out uhttpd.key
 ```
-Place the files _uhttpd.crt_ and _uhttpd.key_ in the _config_ directory and they are automatically installed
-on the router and each accesspoint. The certificate in this example is valid for the main router and access
-points _ap1.home.arpa_ and _ap2.home.arpa_. If you have more access points, changed the names, or are using a different
-IP range, change the command to generate the certificate to match your settings.
+Place the files _uhttpd.crt_ and _uhttpd.key_ in the certs directory and they are automatically installed
+on the router and each accesspoint. The certificates in this example is valid for the main router and access
+points _ap1.home.arpa_ and _ap2.home.arpa_. If you have more access points, changed the names, or are using a different IP range, change the command to generate the certificate to match your settings.
 
 ### Upgrading firmware (optional)
 

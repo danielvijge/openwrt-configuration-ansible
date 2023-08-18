@@ -6,7 +6,7 @@ openwrt:
     routers:
       hosts:
         # The name or IP address can is used to reach this device
-        router.mylan:
+        router:
           # ID of this device, will get the IP address ending in .1
           id: 1
           # Unique name for this device
@@ -45,7 +45,7 @@ openwrt:
     aps:
       hosts:
         # The name or IP address can is used to reach this device
-        ap1.mylan:
+        ap1:
           # ID of this device, will get the IP address ending in .2
           id: 2
           # Unique name for this device
@@ -56,7 +56,7 @@ openwrt:
           # DUID of the device, used for static leases in DHCP
           duid: 00030001e05aeb0a731c
         # Configuration of additional devices
-        ap2.mylan:
+        ap2:
           id: 3
           name: ap2
           model: wdr4300

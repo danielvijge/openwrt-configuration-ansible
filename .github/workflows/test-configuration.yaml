@@ -1,0 +1,19 @@
+name: Test sample configuration
+
+on:
+  push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Run Ansible Playbook
+        uses: arillso/action.playbook@master
+        with:
+          playbook: test_config_local.yaml
+          inventory: inventory-sample.yaml
+          galaxy_file: ansible-requirements.yaml

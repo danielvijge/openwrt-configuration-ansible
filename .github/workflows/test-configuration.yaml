@@ -12,7 +12,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - name: Run Ansible Playbook
-        uses: arillso/action.playbook@master
+        uses: ansible-lockdown/action.playbook@main
         with:
           playbook: test_config_local.yaml
           inventory: inventory-sample.yaml

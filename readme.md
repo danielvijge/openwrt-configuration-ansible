@@ -17,12 +17,12 @@ Besides a description of the setup, this repository also includes an
 Ansible playbook and inventory to centrally apply configuration changes
 to all devices and/or update the firmware version on all devices.
 
-This configuration and the Ansible playbook have been tested with OpenWrt 22.03, 21.02, and 19.07.
+This configuration and the Ansible playbook have been tested with OpenWrt 23.05, 22.03, 21.02, and 19.07.
 It has at least been tested on TP-Link Archer C7-v5 and TP-Link WDR4300 v1, but in theory any
 router supported by OpenWrt should work.
 
-The main branch is based on OpenWrt 22.03. The branches _openwrt-22.02_ and _openwrt-19.07_ contains
-the previous configurations for 22.02 and 19.07 respectively. A lot of improvements from later version
+The main branch is based on OpenWrt 23.05. The branches _openwrt-22.03_, _openwrt-21.02_ and _openwrt-19.07_ contains
+the previous configurations for 21.02 and 19.07 respectively. A lot of improvements from later version
 could be backported to older version, if desired.
 
 ## Table of content
@@ -57,8 +57,8 @@ things can be configured as desired.
 
 ### Packages
 
-* Remove the package _wpad-basic-wolfssl_.
-* Install the packages _wpad-wolfssl_ and _luci-app-dawn_.
+* Remove the package _wpad-basic-mbedtls.
+* Install the packages _wpad-mbedtls and _luci-app-dawn_.
 
 ### System
 
@@ -137,8 +137,8 @@ Each access point is configured in the same way.
 
 ### Packages
 
-* Remove the package _wpad-basic-wolfssl_.
-* Install the package _wpad-wolfssl_ and _dawn_.
+* Remove the package _wpad-basic-mbedtls_.
+* Install the package _wpad-mbedtls_ and _dawn_.
 
 ### System
 

@@ -15,6 +15,7 @@ echo ""
 
 echo -n "Updating package list..."
 opkg update > /dev/null
+echo ""
 
 if [ `opkg list-upgradable | cut -d " " -f1 | wc -l` -gt 0 ]; then
   echo "Available updates:"

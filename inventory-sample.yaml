@@ -205,3 +205,15 @@ openwrt:
     # retrieved.
     upnp:
       configure_with_external_ip: false
+    # Optional configuration for VLANs
+    # vlans:
+    #   - name: Management
+    #     vid: 100
+    #     ports: 0t 1t
+    #   - name: Internet
+    #     vid: 300
+    #     ports: 0t 1t
+    #     # for the main VLAN that connect to the WAN, set wan to true
+    #     wan: true
+    #   - name: Television
+    #     vid: 640

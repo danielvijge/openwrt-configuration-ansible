@@ -8,8 +8,12 @@ config interface 'loopback'
 config globals 'globals'
 	option ula_prefix '{{ ula_prefix }}'
 
-config device 'wan_eth0_2_dev'
+config device
+{% if vlans is defined %}
+	option name 'eth0.{{ vlans | community.general.json_query('[?wan].vid') | first }}'
+{% else %}
 	option name 'eth0.2'
+{% endif %}
 	option macaddr '{{ mac }}'
 
 config switch
@@ -32,11 +36,19 @@ config interface 'lan'
 	option ip6ifaceid '::{{ id }}'
 
 config interface 'wan'
-	option device 'eth0.300'
+{% if vlans is defined %}
+	option device 'eth0.{{ vlans | community.general.json_query('[?wan].vid') | first }}'
+{% else %}
+	option device 'eth0.2'
+{% endif %}
 	option proto 'dhcp'
 
 config interface 'wan6'
-	option device 'eth0.300'
+{% if vlans is defined %}
+	option device 'eth0.{{ vlans | community.general.json_query('[?wan].vid') | first }}'
+{% else %}
+	option device 'eth0.2'
+{% endif %}
 	option proto 'dhcpv6'
 	option reqaddress 'try'
 	option reqprefix 'auto'
@@ -47,26 +59,24 @@ config switch_vlan
 	option ports '0t 2 3 4 5'
 	option vid '1'
 
+{% if vlans is defined %}
+{% for vlan in vlans %}
 config switch_vlan
 	option device 'switch0'
+	option vlan '{{ loop.index+1 }}'
+	option ports '{{ vlan.ports }}'
+	option vid '{{ vlan.vid }}'
+{% if vlan.name is defined %}
+	option description '{{ vlan.name }}'
+{% endif %}
+
+{% endfor %}
+{% else %}
+config switch_vlan
+	option devide 'switch0'
 	option vlan '2'
-	option ports '0t 1t'
-	option vid '100'
-	option description 'Management'
-
-config switch_vlan
-	option device 'switch0'
-	option vlan '3'
-	option ports '0t 1t'
-	option vid '300'
-	option description 'Internet'
-
-config switch_vlan
-	option device 'switch0'
-	option vlan '4'
-	option ports '0t 1t'
-	option vid '640'
-	option description 'Television'
+	option ports '0t 2 3 4 5'
+{% endif %}
 
 {% if ipv6_6to4 is defined %}
 config interface 'wan6to4'

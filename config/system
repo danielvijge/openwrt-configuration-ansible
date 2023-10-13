@@ -22,7 +22,7 @@ config led
 	option default '0'
 {% if inventory_hostname in groups['routers'] %}
 	option trigger 'netdev'
-	option dev 'eth0.2'
+	option dev 'eth0'
 	list mode 'tx'
 	list mode 'rx'
 {% else %}

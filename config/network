@@ -73,9 +73,10 @@ config switch_vlan
 {% endfor %}
 {% else %}
 config switch_vlan
-	option devide 'switch0'
+	option device 'switch0'
 	option vlan '2'
-	option ports '0t 2 3 4 5'
+	option ports '0t 1'
+	option vid '2'
 {% endif %}
 
 {% if ipv6_6to4 is defined %}

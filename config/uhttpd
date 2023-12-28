@@ -21,7 +21,7 @@ config uhttpd 'main'
 
 config cert 'defaults'
 	option days '730'
-	option key_type 'rsa'
+	option key_type 'ec'
 	option bits '2048'
 	option ec_curve 'P-256'
 	option country 'ZZ'

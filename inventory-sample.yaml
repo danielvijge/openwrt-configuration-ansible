@@ -126,6 +126,8 @@ openwrt:
         client_isolation: true
         # Optionally set encryption, defaults to psk2 (WPA2)
         encryption: psk2
+        # Optionally disable advanced roaming featured (802.11r/k/v) (default is true to enable)
+        roaming: false
     # Physical address of the wireless radios. Move lower if using different model, with different settings
     # per model
     radio2_path: platform/ahb/18100000.wmac

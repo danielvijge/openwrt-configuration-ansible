@@ -195,7 +195,7 @@
         recurse: yes
         state: directory
       with_items:
-        - /etc/crontab
+        - /etc/crontabs
       loop_control:
         label: Creating directory {{ item }}
 
@@ -233,7 +233,7 @@
         - name: dawn
           path: /etc/config
         - name: cron
-          path: /etc/crontab
+          path: /etc/crontabs
           filename: root
       loop_control:
         label: Copying {{ item.path }}/{{ item.filename | default(item.name) }}

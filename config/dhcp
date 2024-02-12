@@ -11,6 +11,11 @@ config dnsmasq
 	option localservice '1'
 	option domain '{{ local_domain }}'
 	option local '/{{ local_domain }}/'
+{% if dhcp is defined and dhcp.domain_whitelist is defined %}
+{% for domain in dhcp.domain_whitelist %}
+	list rebind_domain '{{ domain }}'
+{% endfor %}
+{% endif %}
 
 config dhcp 'lan'
 	option interface 'lan'
@@ -29,7 +34,8 @@ config odhcpd 'odhcpd'
 	option maindhcp '0'
 	option leasefile '/tmp/hosts/odhcpd'
 	option leasetrigger '/usr/sbin/odhcpd-update'
-	option loglevel '4'
+{# was 4, set to 3 to disable message 'No default route present, overriding ra_lifetime' #}
+	option loglevel '3'
 
 {% for ap in aps %}
 config host

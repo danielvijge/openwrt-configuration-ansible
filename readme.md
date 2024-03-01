@@ -225,7 +225,7 @@ This can be generated with the following commands:
 
 1. Generate a root certificate:
 ```
-openssl genrsa -out rootCA.key 4096
+openssl ecparam -out rootCA.key -name prime256v1 -genkey
 openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 3650 -subj "/C=NL/O=home/CN=home.arpa Root Certificate" -out rootCA.crt
 ```
 This root certificate can be installed in a browser, so the Luci certificate is accepted.
@@ -233,11 +233,11 @@ The root certificate for the example certificates is included in `certs/rootCA.c
 
 2. Generate a certificate for the router and access points:
 ```
-openssl genrsa -out router.key 4096
+openssl ecparam -out router.key -name prime256v1 -genkey
 openssl req -new -sha256 -key router.key -subj "/C=NL/O=home/CN=router.home.arpa" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "\n[SAN]\nsubjectAltName=DNS:router.home.arpa,IP:10.0.0.1,DNS:ap1.home.arpa,IP:10.0.0.2,DNS:ap2.home.arpa,IP:10.0.0.3")) -out router.csr
 openssl x509 -req -in router.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out router.crt -days 730 -sha256 -extfile <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:router.home.arpa,IP:10.0.0.1,DNS:ap1.home.arpa,IP:10.0.0.2,DNS:ap2.home.arpa,IP:10.0.0.3")) -extensions SAN
 openssl x509 -in router.crt -outform DER -out uhttpd.crt
-openssl rsa -in router.key -outform DER -out uhttpd.key
+openssl ec -in router.key -outform DER -out uhttpd.key
 ```
 Place the files _uhttpd.crt_ and _uhttpd.key_ in the certs directory and they are automatically installed
 on the router and each accesspoint. The certificates in this example is valid for the main router and access

@@ -1,3 +1,4 @@
+{% set vlan = namespace(index=1) %}
 
 config interface 'loopback'
 	option device 'lo'
@@ -8,14 +9,6 @@ config interface 'loopback'
 config globals 'globals'
 	option ula_prefix '{{ ula_prefix }}'
 
-config device
-{% if vlans is defined %}
-	option name 'eth0.{{ vlans | community.general.json_query('[?wan].vid') | first }}'
-{% else %}
-	option name 'eth0.2'
-{% endif %}
-	option macaddr '{{ mac }}'
-
 config switch
 	option name 'switch0'
 	option reset '1'
@@ -24,60 +17,45 @@ config switch
 config device
 	option name 'br-lan'
 	option type 'bridge'
-	list ports 'eth0.1'
+	list ports 'eth0.{{ networks.lan.vlan_id | default('1') }}'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '{{ vlan.index }}'
+	option vid '{{ networks.lan.vlan_id | default('1') }}'
+	option ports '{{ networks.lan.ports | default('1 0t') }}'
+	option description '{{ networks.lan.name | default('lan') }}'
 
 {% if inventory_hostname in groups['routers'] %}
+config device
+  option name 'eth0.{{ networks.wan.vlan_id | default('2') }}'
+
 config interface 'lan'
 	option device 'br-lan'
 	option proto 'static'
-	option netmask '{{ network | ansible.utils.ipaddr('netmask') }}'
-	option ip6assign '60'
-	option ipaddr '{{ network | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
+	option netmask '{{ networks.lan.cidr | ansible.utils.ipaddr('netmask') }}'
+	option ip6assign '64'
+	option ip6hint '{{ networks.lan.ip6hint | default('0') }}'
+	option ipaddr '{{ networks.lan.cidr | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
 	option ip6ifaceid '::{{ id }}'
 
+{% set vlan.index = vlan.index + 1%}
 config interface 'wan'
-{% if vlans is defined %}
-	option device 'eth0.{{ vlans | community.general.json_query('[?wan].vid') | first }}'
-{% else %}
-	option device 'eth0.2'
-{% endif %}
-	option proto 'dhcp'
+  option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
+  option proto 'dhcp'
 
 config interface 'wan6'
-{% if vlans is defined %}
-	option device 'eth0.{{ vlans | community.general.json_query('[?wan].vid') | first }}'
-{% else %}
-	option device 'eth0.2'
-{% endif %}
-	option proto 'dhcpv6'
-	option reqaddress 'try'
-	option reqprefix 'auto'
+  option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
+  option proto 'dhcpv6'
+  option reqaddress 'try'
+  option reqprefix 'auto'
 
 config switch_vlan
-	option device 'switch0'
-	option vlan '1'
-	option ports '0t 2 3 4 5'
-	option vid '1'
-
-{% if vlans is defined %}
-{% for vlan in vlans %}
-config switch_vlan
-	option device 'switch0'
-	option vlan '{{ loop.index+1 }}'
-	option ports '{{ vlan.ports }}'
-	option vid '{{ vlan.vid }}'
-{% if vlan.name is defined %}
-	option description '{{ vlan.name }}'
-{% endif %}
-
-{% endfor %}
-{% else %}
-config switch_vlan
-	option device 'switch0'
-	option vlan '2'
-	option ports '0t 1'
-	option vid '2'
-{% endif %}
+  option device 'switch0'
+  option vlan '{{ vlan.index }}'
+  option ports '{{ networks.wan.ports | default('2 3 4 5 0t') }}'
+  option vid '{{ networks.wan.vlan_id | default('2') }}'
+  option description '{{ networks.wan.name | default('wan') }}'
 
 {% if ipv6_6to4 is defined %}
 config interface 'wan6to4'
@@ -106,17 +84,53 @@ config interface 'lan'
 	option device 'br-lan'
 	option proto 'dhcp'
 
-config switch_vlan
-	option device 'switch0'
-	option vlan '1'
-	option ports '0t 1 2 3 4 5'
-	option vid '1'
-
 config interface 'lan6'
 	option proto 'dhcpv6'
 	option reqaddress 'try'
 	option reqprefix 'no'
 	option device '@lan'
 	option type 'bridge'
+{% endif %}
 
+{% for _, network in networks.items() %}
+{% if _ not in ('lan', 'wan','additional') %}
+{% set vlan.index = vlan.index + 1%}
+config device
+	option name 'br-{{ _ }}'
+	option type 'bridge'
+	list ports 'eth0.{{ network.vlan_id }}'
+
+config interface '{{ _ }}'
+	option device 'br-{{ _ }}'
+{% if inventory_hostname in groups['routers'] %}
+	option proto 'static'
+	option netmask '{{ network.cidr | ansible.utils.ipaddr('netmask') }}'
+	option ip6assign '64'
+	option ip6hint '{{ network.ip6hint | default(loop.index*10) }}'
+	option ipaddr '{{ network.cidr | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
+	option ip6ifaceid '::{{ id }}'
+{% else %}
+	option proto 'none'
+{% endif %}
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '{{ vlan.index }}'
+	option vid '{{ network.vlan_id }}'
+	option ports '{{ network.ports | default('2 3 4 5 0t') }}'
+	option description '{{ network.name }}'
+
+{% endif %}
+{% endfor %}
+{% if networks.additional is defined %}
+{% for network in networks.additional %}
+{% set vlan.index = vlan.index + 1%}
+config switch_vlan
+  option device 'switch0'
+  option vlan '{{ vlan.index }}'
+  option ports '{{ network.ports }}'
+  option vid '{{ network.vlan_id }}'
+  option description '{{ network.name }}'
+
+{% endfor %}
 {% endif %}

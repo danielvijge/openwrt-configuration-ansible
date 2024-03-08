@@ -11,7 +11,7 @@ config upnpd 'config'
 {% if upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip %}
 	option external_ip '{{ external_ip }}'
 {% endif %}
-	option presentation_url 'http://{{ network | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
+	option presentation_url 'http://{{ networks.lan.cidr | ansible.utils.ipaddr(id) | ansible.utils.ipv4('address')}}'
 
 config perm_rule
 	option action 'allow'

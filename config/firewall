@@ -155,11 +155,47 @@ config redirect
 	option dest 'lan'
 	option dest_port '{{ forward.port }}'
 	option target 'DNAT'
-	option dest_ip '{{ network | ansible.utils.ipaddr(forward.to) | ansible.utils.ipv4('address')}}'
+	option dest_ip '{{ networks[forward.network | default('lan')].cidr | ansible.utils.ipaddr(forward.to) | ansible.utils.ipv4('address')}}'
 	option proto 'tcp udp'
 {% if forward.source_ip is defined %}
 	option src_ip '{{ forward.source_ip }}'
 {% endif %}
-
 {% endfor %}
 {% endif %}
+
+{% for _, network in networks.items() %}
+{% if _ not in ('lan','wan', 'additional') %}
+config zone
+	option name '{{ _ }}'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+	list network '{{ _ }}'
+
+config forwarding
+	option src '{{ _ }}'
+	option dest 'wan'
+
+config forwarding
+	option src 'lan'
+	option dest '{{ _ }}'
+
+config rule
+	option name 'Allow-DNS-{{ _ }}'
+	option src '{{ _ }}'
+	option dest_port '53'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-DHCP-{{ _ }}'
+	option src '{{ _ }}'
+	option dest_port '67'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Disallow-Device-{{ _ }}'
+	option src '{{ _ }}'
+	option target 'REJECT'
+{% endif %}
+{% endfor %}
+

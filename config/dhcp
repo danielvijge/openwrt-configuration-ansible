@@ -17,8 +17,10 @@ config dnsmasq
 {% endfor %}
 {% endif %}
 
-config dhcp 'lan'
-	option interface 'lan'
+{% for _, network in networks.items() %}
+{% if _ not in ('wan','additional') %}
+config dhcp '{{ _ }}'
+	option interface '{{ _ }}'
 	option limit '150'
 	option leasetime '12h'
 	option start '{{ groups['openwrt'] | length +2 }}'
@@ -26,6 +28,8 @@ config dhcp 'lan'
 	option dhcpv6 '{{ 'server' if inventory_hostname in groups['routers'] else 'hybrid' }}'
 	option ra_management '1'
 
+{% endif %}
+{% endfor %}
 config dhcp 'wan'
 	option interface 'wan'
 	option ignore '1'
@@ -41,7 +45,7 @@ config odhcpd 'odhcpd'
 config host
 	option mac '{{ hostvars[ap].mac }}'
 	option dns '1'
-	option ip '{{ network | ansible.utils.ipaddr(hostvars[ap].id) | ansible.utils.ipv4('address')}}'
+	option ip '{{ networks.lan.cidr | ansible.utils.ipaddr(hostvars[ap].id) | ansible.utils.ipv4('address')}}'
 	option name '{{ hostvars[ap].name }}'
 	option hostid '{{ hostvars[ap].id }}'
 	option duid '{{ hostvars[ap].duid }}'
@@ -53,7 +57,7 @@ config host
 	option name '{{ host.name }}'
 	option mac '{{ host.mac }}'
 	option dns '1'
-	option ip '{{ network | ansible.utils.ipaddr(host.id) | ansible.utils.ipv4('address')}}'
+	option ip '{{ networks[host.network | default('lan')].cidr | ansible.utils.ipaddr(host.id) | ansible.utils.ipv4('address')}}'
 	option hostid '{{ host.id }}'
 	option duid '{{ host.duid }}'
 	

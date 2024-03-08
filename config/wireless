@@ -1,3 +1,4 @@
+{% set wifi = namespace(index=0) %}
 
 config wifi-device 'radio0'
 	option type 'mac80211'
@@ -17,109 +18,58 @@ config wifi-device 'radio1'
 	option country 'NL'
 	option cell_density '0'
 
-config wifi-iface 'default_radio0'
+{% for _, network in networks.items() %}
+{% set parent_loop_index0 = loop.index0 %}
+{% if network.wireless is defined %}
+{% for wireless in network.wireless  %}
+config wifi-iface 'wifi{{ parent_loop_index0 }}_radio0'
 	option device 'radio0'
-	option network 'lan'
+	option network '{{ _ }}'
 	option mode 'ap'
-	option key '{{ passphrase }}'
-	option encryption '{{ encryption }}'
-	option ssid '{{ SSID }}'
-	option ft_over_ds '1'
-	option ft_psk_generate_local '1'
-	option ieee80211r '1'
-	option bss_transition '1'
-	option wnm_sleep_mode '1'
-	option time_advertisement '2'
-	option time_zone 'Europe/Amsterdam'
-	option ieee80211k '1'
-	option rrm_neighbor_report '1'
-	option rrm_beacon_report '1'
-	option macfilter 'deny'
-{% if blocked_mac_addresses_on_wifi is defined %}
-{% for macaddress in blocked_mac_addresses_on_wifi %}
-	list maclist '{{ macaddress }}'
-{% endfor %}
-{% endif %}
-
-config wifi-iface 'default_radio1'
-	option device 'radio1'
-	option network 'lan'
-	option mode 'ap'
-	option key '{{ passphrase }}'
-	option encryption '{{ encryption }}'
-	option ssid '{{ SSID }}'
-	option ft_over_ds '1'
-	option ft_psk_generate_local '1'
-	option ieee80211r '1'
-	option bss_transition '1'
-	option wnm_sleep_mode '1'
-	option time_advertisement '2'
-	option time_zone 'Europe/Amsterdam'
-	option ieee80211k '1'
-	option rrm_neighbor_report '1'
-	option rrm_beacon_report '1'
-	option macfilter 'deny'
-{% if blocked_mac_addresses_on_wifi is defined %}
-{% for macaddress in blocked_mac_addresses_on_wifi %}
-	list maclist '{{ macaddress }}'
-{% endfor %}
-{% endif %}
-
-{% if additional_wireless_networks is defined %}
-{% for wireless_network in additional_wireless_networks %}
-
-config wifi-iface 'wifi{{ loop.index }}_radio0'
-	option device 'radio0'
-	option network 'lan'
-	option mode 'ap'
-	option key '{{ wireless_network.passphrase }}'
-	option encryption '{{ wireless_network.encryption | default('psk2') }}'
-	option ssid '{{ wireless_network.SSID }}'
-	option time_zone 'Europe/Amsterdam'
-{% if wireless_network.roaming | default(true) %}
-	option ft_over_ds '1'
-	option ft_psk_generate_local '1'
-	option ieee80211r '1'
-	option bss_transition '1'
-	option wnm_sleep_mode '1'
-	option time_advertisement '2'
-	option ieee80211k '1'
-	option rrm_neighbor_report '1'
-	option rrm_beacon_report '1'
-{% endif %}
-	option macfilter 'deny'
-{% if wireless_network.client_isolation is defined and wireless_network.client_isolation %}
+	option key '{{ wireless.passphrase }}'
+	option encryption '{{ wireless.encryption | default('psk2') }}'
+	option ssid '{{ wireless.SSID }}'
+{% if wireless.client_isolation is defined and wireless.client_isolation %}
 	option isolate '1'
 {% endif %}
-{% if blocked_mac_addresses_on_wifi is defined %}
-{% for macaddress in blocked_mac_addresses_on_wifi %}
-	list maclist '{{ macaddress }}'
-{% endfor %}
-{% endif %}
-
-config wifi-iface 'wifi{{ loop.index }}_radio1'
-	option device 'radio1'
-	option network 'lan'
-	option mode 'ap'
-	option key '{{ wireless_network.passphrase }}'
-	option encryption '{{ wireless_network.encryption | default('psk2') }}'
-	option ssid '{{ wireless_network.SSID }}'
-	option time_zone 'Europe/Amsterdam'
-{% if wireless_network.roaming | default(true) %}
+{% if wireless.roaming | default(true) %}
 	option ft_over_ds '1'
 	option ft_psk_generate_local '1'
 	option ieee80211r '1'
 	option bss_transition '1'
 	option wnm_sleep_mode '1'
 	option time_advertisement '2'
+	option time_zone 'Europe/Amsterdam'
 	option ieee80211k '1'
-	option rrm_neighbor_report '1'
-	option rrm_beacon_report '1'
 {% endif %}
 	option macfilter 'deny'
-{% if wireless_network.client_isolation is defined and wireless_network.client_isolation %}
+{% if blocked_mac_addresses_on_wifi is defined %}
+{% for macaddress in blocked_mac_addresses_on_wifi %}
+	list maclist '{{ macaddress }}'
+{% endfor %}
+{% endif %}
+
+config wifi-iface 'wifi{{ parent_loop_index0 }}_radio1'
+	option device 'radio1'
+	option network '{{ _ }}'
+	option mode 'ap'
+	option key '{{ wireless.passphrase }}'
+	option encryption '{{ wireless.encryption | default('psk2') }}'
+	option ssid '{{ wireless.SSID }}'
+{% if wireless.client_isolation is defined and wireless.client_isolation %}
 	option isolate '1'
 {% endif %}
+{% if wireless.roaming | default(true) %}
+	option ft_over_ds '1'
+	option ft_psk_generate_local '1'
+	option ieee80211r '1'
+	option bss_transition '1'
+	option wnm_sleep_mode '1'
+	option time_advertisement '2'
+	option time_zone 'Europe/Amsterdam'
+	option ieee80211k '1'
+{% endif %}
+	option macfilter 'deny'
 {% if blocked_mac_addresses_on_wifi is defined %}
 {% for macaddress in blocked_mac_addresses_on_wifi %}
 	list maclist '{{ macaddress }}'
@@ -128,3 +78,4 @@ config wifi-iface 'wifi{{ loop.index }}_radio1'
 
 {% endfor %}
 {% endif %}
+{% endfor %}

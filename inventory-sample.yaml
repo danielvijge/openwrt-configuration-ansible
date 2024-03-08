@@ -16,7 +16,7 @@ openwrt:
           # if the complete network contains different models
           model: archer-c7-v5
           # MAC address of the port that connect upstream. For the router this
-          # is the port that is connected to the mode.
+          # is the port that is connected to the modem.
           mac: DD:73:8A:96:87:61
           # HTMode for the wireless radio on the 2.4GHz band
           radio2_htmode: HT20
@@ -41,6 +41,23 @@ openwrt:
           # Useful if a specific local version is installed
           pin:
             - miniupnpd
+        # Network settiongs that are specific to this device. This dict will be merged
+        # with openwrt.vars.networks into one dict.
+        host_networks:
+          lan:
+            # Specific ports used for vlan tagging on this device
+            ports: 0t 2 3 5t
+          iot:
+            ports: 0t 4 5t
+          # additional has a special meaning and can be used to define any additional
+          # VLANs that aren't turned into full networks
+          additional:
+            - name: Management
+              vlan_id: 100
+              ports: 0t 1t
+            - name: Television
+              vlan_id: 640
+              ports: 0t 1t
     # All the access points. There can be 0 or more access points
     aps:
       hosts:
@@ -104,30 +121,60 @@ openwrt:
       # to set packages on a group level that should be removed.
       remove:
         - wpad-basic-mbedtls
-    # Network address, this would allow address from 10.0.0.1 - 10.0.0.255
-    network: 10.0.0.0/24
     # Local domain name
     local_domain: home.arpa
     # Local IPv6 addresses
     ula_prefix: fd54:28cd:b1c3::/48
-    # Name of the wireless network
-    SSID: mylan
-    # Wireless password
-    passphrase: mypassword
+    # Define the networks and wireless networks. This creates networks,
+    # firewall zones, and wireless networks. Two networks have a special
+    # meaning:
+    # 'wan': this is the network that connects upstream, either to the
+    #    modem, or directly to a fibre connection.
+    # 'lan': the main internal network. Access points are connected to the
+    #    lan network. Any other network are accessible from the lan, but
+    #    other networks cannot connect to clients in the lan.
+    # Any other networks defined, such as an iot or guest network will
+    # be turned in separate networks and firewall zones that are isolated
+    # from other networks.
+    # Only lan.cidr is required
+    common_networks:
+      wan:
+        # A name for the network, just as VLAN name
+        name: Internet
+        # The VLAN id, will result in an eth0.5 network
+        vlan_id: 5
+        # VLAN port tagging
+        ports: 0t 1t
+      lan:
+        name: lan
+        vlan_id: 10
+        # The IPv4 CIDR range for this network
+        cidr: 10.0.0.0/24
+        # Each network becomes a /64 network, and all clients in the network
+        # will get IPv6 addresses in the range of {{ula_prefix}}:{{ipv6hint}}::/64
+        ip6hint: 0
+        # The wireless network for this networks/firewall zone
+        wireless:
+          - SSID: TMNL-1B5481
+            # wifi password
+            passphrase: M7SSWP7BM4C7KVMR
+            # wifi encryption method
+            encryption: psk2
+      iot:
+        name: iot
+        vlan_id: 20
+        cidr: 10.0.1.0/24
+        ip6hint: 10
+        wireless:
+          - SSID: TMNL-1B5481_iot
+            passphrase: A6WK4XQZ632NG5HP
+            encryption: psk2
+            # Enable client isolation, defaults to false
+            client_isolation: true
+            # Disable 802.11r/v/k roaming, default to true
+            roaming: false
     # SSH password of the root user
     ssh_password: rootpassword
-    # Type of encryption, like 'psk2' (WPA2) or 'sae-mixed' (WPA2/WPA3)
-    encryption: sea-mixed
-    # Optional additional wireless networks, such as a guest or IoT network
-    additional_wireless_networks:
-      - SSID: my-lan-guest
-        passphrase: mypassword
-        # Optionally enable client isolation for guest/IoT network
-        client_isolation: true
-        # Optionally set encryption, defaults to psk2 (WPA2)
-        encryption: psk2
-        # Optionally disable advanced roaming featured (802.11r/k/v) (default is true to enable)
-        roaming: false
     # Physical address of the wireless radios. Move lower if using different model, with different settings
     # per model
     radio2_path: platform/ahb/18100000.wmac
@@ -137,7 +184,6 @@ openwrt:
       - ssh-rsa AAAAB3N....== user@machine
     
     # All configuration below is optional and can safely be removed
-
     # Optionally, use Hurricane Electric/Tunnelbroker to get IPv6 if you don't have native IPv6
     # See https://tunnelbroker.net/
     henet:
@@ -180,6 +226,12 @@ openwrt:
         id: 254
         mac: 20:09:AF:FA:7B:31
         duid: 0001000123f7fb792009affa7b31
+      - name: streamingbox
+        id: 100
+        mac: DD:45:4F:4A:2E:99
+        duid: 0001000123f7fb79dd454f4a2e99
+        # define the network this static client is in. Defaults to lan if not defined
+        network: iot
     # Hostname that are created. Devices that have a DHCP name will automatically
     # be accessible via name.network
     host_names:
@@ -207,15 +259,3 @@ openwrt:
     # retrieved.
     upnp:
       configure_with_external_ip: false
-    # Optional configuration for VLANs
-    # vlans:
-    #   - name: Management
-    #     vid: 100
-    #     ports: 0t 1t
-    #   - name: Internet
-    #     vid: 300
-    #     ports: 0t 1t
-    #     # for the main VLAN that connect to the WAN, set wan to true
-    #     wan: true
-    #   - name: Television
-    #     vid: 640

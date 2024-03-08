@@ -235,6 +235,8 @@
         - name: cron
           path: /etc/crontabs
           filename: root
+      vars:
+        networks: "{{ common_networks | combine(host_networks | default({}), recursive=True) }}"
       loop_control:
         label: Copying {{ item.path }}/{{ item.filename | default(item.name) }}
 

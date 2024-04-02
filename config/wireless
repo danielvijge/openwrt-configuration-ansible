@@ -75,6 +75,9 @@ config wifi-iface 'wifi{{ parent_loop_index0 }}_radio1'
 	list maclist '{{ macaddress }}'
 {% endfor %}
 {% endif %}
+{% if wireless.legacy_rates | default(false) %}
+	legacy_rates '1'
+{% endif %}
 
 {% endfor %}
 {% endif %}

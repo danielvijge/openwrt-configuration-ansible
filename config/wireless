@@ -19,17 +19,16 @@ config wifi-device 'radio1'
 	option cell_density '0'
 
 {% for _, network in networks.items() %}
-{% set parent_loop_index0 = loop.index0 %}
 {% if network.wireless is defined %}
 {% for wireless in network.wireless  %}
-config wifi-iface 'wifi{{ parent_loop_index0 }}_radio0'
+config wifi-iface 'wifi{{ wifi.index }}_radio0'
 	option device 'radio0'
 	option network '{{ _ }}'
 	option mode 'ap'
 	option key '{{ wireless.passphrase }}'
 	option encryption '{{ wireless.encryption | default('psk2') }}'
 	option ssid '{{ wireless.SSID }}'
-{% if wireless.client_isolation is defined and wireless.client_isolation %}
+{% if wireless.client_isolation | default(false) %}
 	option isolate '1'
 {% endif %}
 {% if wireless.roaming | default(true) %}
@@ -49,14 +48,14 @@ config wifi-iface 'wifi{{ parent_loop_index0 }}_radio0'
 {% endfor %}
 {% endif %}
 
-config wifi-iface 'wifi{{ parent_loop_index0 }}_radio1'
+config wifi-iface 'wifi{{ wifi.index }}_radio1'
 	option device 'radio1'
 	option network '{{ _ }}'
 	option mode 'ap'
 	option key '{{ wireless.passphrase }}'
 	option encryption '{{ wireless.encryption | default('psk2') }}'
 	option ssid '{{ wireless.SSID }}'
-{% if wireless.client_isolation is defined and wireless.client_isolation %}
+{% if wireless.client_isolation | default(false) %}
 	option isolate '1'
 {% endif %}
 {% if wireless.roaming | default(true) %}
@@ -79,6 +78,7 @@ config wifi-iface 'wifi{{ parent_loop_index0 }}_radio1'
 	legacy_rates '1'
 {% endif %}
 
+{% set wifi.index = wifi.index + 1 %}
 {% endfor %}
 {% endif %}
 {% endfor %}

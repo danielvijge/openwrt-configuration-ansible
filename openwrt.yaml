@@ -90,6 +90,14 @@
       loop_control:
         label: Removing {{ item }}
     
+    - name: Set required packages for gekmihesg.openwrt
+      when: firmware != '' and not latest_version_installed
+      set_fact:
+        gekmihesg_openwrt_required_packages:
+          - coreutils-base64
+          - coreutils-md5sum
+          - coreutils-sha1sum
+
     - name: Install packages
       when: (common_packages.install is defined or packages.install is defined) and item not in installed_packages
       opkg:
@@ -97,6 +105,7 @@
         state: present
         update_cache: yes
       with_flattened:
+        - '{{ gekmihesg_openwrt_required_packages | default([]) }}'
         - '{{ common_packages.install | default([]) }}'
         - '{{ packages.install | default([]) }}'
       loop_control:

@@ -23,7 +23,7 @@ config switch_vlan
 	option device 'switch0'
 	option vlan '{{ vlan.index }}'
 	option vid '{{ networks.lan.vlan_id | default('1') }}'
-	option ports '{{ networks.lan.ports | default('1 0t') }}'
+	option ports '{{ networks.lan.ports | default('2 3 4 5 0t') }}'
 	option description '{{ networks.lan.name | default('lan') }}'
 
 {% if inventory_hostname in groups['routers'] %}
@@ -53,7 +53,7 @@ config interface 'wan6'
 config switch_vlan
   option device 'switch0'
   option vlan '{{ vlan.index }}'
-  option ports '{{ networks.wan.ports | default('2 3 4 5 0t') }}'
+  option ports '{{ networks.wan.ports | default('1 0t') }}'
   option vid '{{ networks.wan.vlan_id | default('2') }}'
   option description '{{ networks.wan.name | default('wan') }}'
 

@@ -11,5 +11,5 @@ config queue 'eth1'
 	option download '{{ sqm.download }}'
 	option upload '{{ sqm.upload }}'
 	option interface 'eth0'
-	option enabled '1'
+	option enabled '{{ 1 if not sqm.enabled is defined or (sqm.enabled is defined and sqm.enabled == true) else 0 }}'
 {% endif %}

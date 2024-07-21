@@ -47,7 +47,7 @@ config host
 	option dns '1'
 	option ip '{{ networks.lan.cidr | ansible.utils.ipaddr(hostvars[ap].id) | ansible.utils.ipv4('address')}}'
 	option name '{{ hostvars[ap].name }}'
-	option hostid '{{ hostvars[ap].id }}'
+	option hostid '{{ '%0x' % hostvars[ap].id }}'
 	option duid '{{ hostvars[ap].duid }}'
 
 {% endfor %}
@@ -58,7 +58,7 @@ config host
 	option mac '{{ host.mac }}'
 	option dns '1'
 	option ip '{{ networks[host.network | default('lan')].cidr | ansible.utils.ipaddr(host.id) | ansible.utils.ipv4('address')}}'
-	option hostid '{{ host.id }}'
+	option hostid '{{ '%0x' % host.id }}'
 	option duid '{{ host.duid }}'
 	
 {% endfor %}

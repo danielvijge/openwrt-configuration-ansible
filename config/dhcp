@@ -16,6 +16,9 @@ config dnsmasq
 	list rebind_domain '{{ domain }}'
 {% endfor %}
 {% endif %}
+{% if dhcp is defined and dhcp.tags is defined %}
+	option strictorder '1'
+{% endif %}
 
 {% for _, network in networks.items() %}
 {% if _ not in ('wan','additional') %}

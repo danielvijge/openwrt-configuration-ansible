@@ -259,3 +259,13 @@ openwrt:
     # retrieved.
     upnp:
       configure_with_external_ip: false
+    dhcp:
+      domain_whitelist:
+        - plex.direct
+      tags:
+        - tag: CloudFlareFamily
+          server:
+            - 1.1.1.3
+            - 1.0.0.3
+          hosts:
+            - DD:45:4F:4A:2E:99

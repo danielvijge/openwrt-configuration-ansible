@@ -8,6 +8,7 @@ config interface 'loopback'
 
 config globals 'globals'
 	option ula_prefix '{{ ula_prefix }}'
+	option packet_steering '0'
 
 config switch
 	option name 'switch0'
@@ -49,6 +50,7 @@ config interface 'wan6'
   option proto 'dhcpv6'
   option reqaddress 'try'
   option reqprefix 'auto'
+  option norelease '1'
 
 config switch_vlan
   option device 'switch0'
@@ -90,6 +92,7 @@ config interface 'lan6'
 	option reqprefix 'no'
 	option device '@lan'
 	option type 'bridge'
+	option norelease '1'
 {% endif %}
 
 {% for _, network in networks.items() %}

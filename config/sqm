@@ -1,7 +1,6 @@
 
 {% if sqm is defined %}
 config queue 'eth1'
-	option qdisc_advanced '0'
 	option debug_logging '0'
 	option verbosity '5'
 	option qdisc 'cake'

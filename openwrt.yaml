@@ -244,6 +244,8 @@
         - name: cron
           path: /etc/crontabs
           filename: root
+        - name: dropbear
+          path: /etc/config
       vars:
         networks: "{{ common_networks | combine(host_networks | default({}), recursive=True) }}"
       loop_control:

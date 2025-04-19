@@ -199,3 +199,14 @@ config rule
 {% endif %}
 {% endfor %}
 
+{% if firewall is defined and firewall.block_wan_access is defined %}
+config rule
+	option name 'Blocked-Devices'
+	option src '*'
+	option dest 'wan'
+	option target 'REJECT'
+	list proto 'all'
+{% for blocked_device in firewall.block_wan_access %}
+	list src_mac '{{ blocked_device }}'
+{% endfor %}
+{% endif %}

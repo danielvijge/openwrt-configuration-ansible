@@ -269,3 +269,6 @@ openwrt:
             - 1.0.0.3
           hosts:
             - DD:45:4F:4A:2E:99
+    firewall:
+      block_wan_access:
+        - DD:45:4F:4A:2E:99 # Block internet access for this device, but allow connecting to internal network

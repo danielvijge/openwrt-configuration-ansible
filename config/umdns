@@ -1,0 +1,7 @@
+config umdns
+	option jail 1
+{% for _, network in networks.items() %}
+{% if _ not in ('wan','additional') %}
+	list network {{ network.name if network.name is defined else _ }}
+{% endif %}
+{% endfor %}

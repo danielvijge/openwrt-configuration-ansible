@@ -83,6 +83,8 @@
           filename: root
         - name: dropbear
           path: etc/config
+        - name: umdns
+          path: etc/config
       vars:
         networks: "{{ common_networks | combine(host_networks | default({}), recursive=True) }}"
       loop_control:

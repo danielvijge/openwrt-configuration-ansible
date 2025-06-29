@@ -88,7 +88,7 @@
         - '{{ common_packages.remove | default([]) }}'
         - '{{ packages.remove | default([]) }}'
       loop_control:
-        label: Removing {{ item }}
+        label: Removed {{ item }}
     
     - name: Set required packages for gekmihesg.openwrt
       when: firmware != '' and not latest_version_installed
@@ -109,7 +109,7 @@
         - '{{ common_packages.install | default([]) }}'
         - '{{ packages.install | default([]) }}'
       loop_control:
-        label: Installing {{ item }}
+        label: Installed {{ item }}
 
     - name: Copy local packages
       when: common_packages.local is defined or packages.local is defined
@@ -120,7 +120,7 @@
         - '{{ common_packages.local | default([]) }}'
         - '{{ packages.local | default([]) }}'
       loop_control:
-        label: Copying {{ item }}
+        label: Copied {{ item }}
 
     - name: Install local packages
       when: common_packages.local is defined or packages.local is defined
@@ -132,7 +132,7 @@
         - '{{ common_packages.local | default([]) }}'
         - '{{ packages.local | default([]) }}'
       loop_control:
-        label: Installing {{ item }}
+        label: Installed {{ item }}
       register: opkg_install_local_command
       failed_when: '"Installing " not in opkg_install_local_command.msg'
 
@@ -145,7 +145,7 @@
         - '{{ common_packages.local | default([]) }}'
         - '{{ packages.local | default([]) }}'
       loop_control:
-        label: Cleaning up /tmp/{{ item }}
+        label: Cleaned up /tmp/{{ item }}
 
     - name: Pin packages
       when: common_packages.pin is defined or packages.pin is defined
@@ -154,7 +154,7 @@
         - '{{ common_packages.pin | default([]) }}'
         - '{{ packages.pin | default([]) }}'
       loop_control:
-        label: Pinning {{ item }}
+        label: Pinned {{ item }}
 
     - name: Get packages that can be upgraded
       when: upgrade_packages is defined and upgrade_packages
@@ -174,7 +174,7 @@
       with_flattened:
         - '{{ available_upgrades }}'
       loop_control:
-        label: Upgrading {{ item }}
+        label: Upgraded {{ item }}
 
     - name: Get public IP address
       when: upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip
@@ -206,7 +206,7 @@
       with_items:
         - /etc/crontabs
       loop_control:
-        label: Creating directory {{ item }}
+        label: Created directory {{ item }}
 
     - name: Copy configuration
       template:
@@ -249,7 +249,7 @@
       vars:
         networks: "{{ common_networks | combine(host_networks | default({}), recursive=True) }}"
       loop_control:
-        label: Copying {{ item.path }}/{{ item.filename | default(item.name) }}
+        label: Copied {{ item.path }}/{{ item.filename | default(item.name) }}
 
     - name: Copy configuration (binary files)
       copy:
@@ -261,7 +261,7 @@
         - name: uhttpd.key
           path: /etc
       loop_control:
-        label: Copying {{ item.path }}/{{ item.name }}
+        label: Copied {{ item.path }}/{{ item.name }}
         
     - name: Copy additional scripts
       copy:
@@ -271,7 +271,7 @@
       with_items:
         - upgrade-all-packages
       loop_control:
-        label: Copying script to /usr/sbin/{{ item }}
+        label: Copied script to /usr/sbin/{{ item }}
 
     - name: Disable services
       when: disabled_services is defined
@@ -281,7 +281,7 @@
         enabled: no
       loop: '{{ disabled_services }}'
       loop_control:
-        label: Disabling service {{ item }}
+        label: Disabled service {{ item }}
 
     - name: Reboot device
       when: reboot_after is not defined or reboot_after

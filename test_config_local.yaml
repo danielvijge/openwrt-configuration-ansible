@@ -43,7 +43,7 @@
         - etc/crontabs
         - etc/dropbear
       loop_control:
-        label: Creating directory {{ item }}
+        label: Created directory {{ item }}
 
     - name: Copy configuration
       template:
@@ -86,7 +86,7 @@
       vars:
         networks: "{{ common_networks | combine(host_networks | default({}), recursive=True) }}"
       loop_control:
-        label: Copying {{ item.path }}/{{ item.filename | default(item.name) }}
+        label: Copied {{ item.path }}/{{ item.filename | default(item.name) }}
 
     - name: Copy configuration (binary files)
       copy:
@@ -98,4 +98,4 @@
         - name: uhttpd.key
           path: etc
       loop_control:
-        label: Copying {{ item.path }}/{{ item.name }}
+        label: Copied {{ item.path }}/{{ item.name }}

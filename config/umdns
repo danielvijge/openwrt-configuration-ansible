@@ -2,6 +2,8 @@ config umdns
 	option jail 1
 {% for _, network in networks.items() %}
 {% if _ not in ('wan','additional') %}
+{% if network.wireless is defined and network.wireless | map(attribute='roaming', default=true) | select | list | length > 0 %}
 	list network {{ network.name if network.name is defined else _ }}
+{% endif %}
 {% endif %}
 {% endfor %}

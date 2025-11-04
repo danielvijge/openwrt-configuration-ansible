@@ -25,15 +25,15 @@ if [ `opkg list-upgradable | cut -d " " -f1 | wc -l` -gt 0 ]; then
   valid=0
   while [ $valid == 0 ]
   do
-    read -n1 -s -p "Upgrade all available packages? [Y/n]" choice
+    read -n1 -s -p "Upgrade all available packages? [y/N]" choice
     case $choice in
-      y|Y|"" )
+      y|Y )
         valid=1
         echo ""
         echo "Upgrading all packages..."
         opkg list-upgradable | cut -d " " -f1 | xargs -r opkg upgrade
         ;;
-      n|N)
+      n|N|"" )
         valid=1
         echo ""
         echo "Upgrade cancelled"

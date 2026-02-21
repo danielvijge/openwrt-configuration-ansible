@@ -1,98 +1,94 @@
-- hosts: openwrt
+- name: Upgrade fleet of OpenWrt routers and install packages
+  hosts: openwrt
   connection: ssh
   user: root
-  become: yes
-  gather_facts: no
+  become: true
+  gather_facts: false
   serial: 1
   ignore_unreachable: true
   vars:
     aps: "{{ groups['aps'] }}"
+    openwrt_scp_if_ssh: true # suppress Ansible warning by explicitly setting to true
 
   roles:
-    - gekmihesg.openwrt
+    - community.openwrt.init
 
   tasks:
 
+    - name: Gather OpenWrt facts
+      community.openwrt.setup:
+
     - name: List all firmware
       delegate_to: localhost
-      become: no
-      find:
+      become: false
+      ansible.builtin.find:
         path: firmware
         patterns: '*{{ model }}*sysupgrade.bin'
       register: firmware_candidates
       check_mode: false
 
     - name: Select newest firmware image
-      set_fact:
+      ansible.builtin.set_fact:
         firmware: '{{ firmware_candidates.files | sort(attribute="ctime", reverse=True) | map(attribute="path") | first | default("") }}'
-
-    - name: Get currently installed version
-      when: firmware != ''
-      shell: source /etc/openwrt_release && echo "$DISTRIB_RELEASE"
-      register: openwrt_version_command
-      check_mode: false
-
-    - name: Get currently installed version
-      when: firmware != ''
-      set_fact:
-        openwrt_version: '{{ openwrt_version_command.stdout_lines[0] }}'
 
     - name: Determine if new firmware should be installed
       when: firmware != ''
-      set_fact:
-        latest_version_installed: '{{ firmware | regex_findall(openwrt_version) | length | bool }}'
+      ansible.builtin.set_fact:
+        latest_version_installed: '{{ firmware | regex_findall(ansible_distribution_version) | length | bool }}'
 
     - name: Confirm upgrade of firmware
       when: firmware != '' and not latest_version_installed
-      pause:
+      ansible.builtin.pause:
         prompt: OpenWrt will be upgraded to {{ firmware }}. Continue?
 
     - name: Copy new OpenWrt firmware
       when: firmware != '' and not latest_version_installed
-      copy:
+      community.openwrt.copy:
         src: '{{ firmware }}'
         dest: /tmp/sysupgrade.bin
-    
+
     - name: Start sysupgrade
       when: firmware != '' and not latest_version_installed
-      nohup:
+      community.openwrt.nohup:
         command: sysupgrade -q /tmp/sysupgrade.bin
-    
+
     - name: Wait for reboot
       when: firmware != '' and not latest_version_installed
-      wait_for_connection:
+      ansible.builtin.wait_for_connection:
         timeout: 300
         delay: 60
 
     - name: Ensure reboot after configuration
       when: firmware != '' and not latest_version_installed
-      set_fact:
-        reboot_after: yes
+      ansible.builtin.set_fact:
+        reboot_after: true
 
     - name: Get a list of all installed packages
-      shell: opkg list-installed | cut -d " " -f1
+      community.openwrt.command:
+        cmd: opkg list-installed | cut -d " " -f1
+        uses_shell: true
       register: installed_packages_command
       check_mode: false
 
     - name: Get a list of all installed packages
-      set_fact:
+      ansible.builtin.set_fact:
         installed_packages: '{{ installed_packages_command.stdout_lines }}'
       check_mode: false
 
     - name: Remove packages
       when: (common_packages.remove is defined or packages.remove is defined) and item in installed_packages
-      opkg:
+      community.openwrt.opkg:
         name: '{{ item }}'
         state: absent
-      with_flattened:
+      with_community.general.flattened:
         - '{{ common_packages.remove | default([]) }}'
         - '{{ packages.remove | default([]) }}'
       loop_control:
         label: Removed {{ item }}
-    
+
     - name: Set required packages for gekmihesg.openwrt
       when: firmware != '' and not latest_version_installed
-      set_fact:
+      ansible.builtin.set_fact:
         gekmihesg_openwrt_required_packages:
           - coreutils-base64
           - coreutils-md5sum
@@ -100,11 +96,11 @@
 
     - name: Install packages
       when: (common_packages.install is defined or packages.install is defined) and item not in installed_packages
-      opkg:
+      community.openwrt.opkg:
         name: '{{ item }}'
         state: present
-        update_cache: yes
-      with_flattened:
+        update_cache: true
+      with_community.general.flattened:
         - '{{ gekmihesg_openwrt_required_packages | default([]) }}'
         - '{{ common_packages.install | default([]) }}'
         - '{{ packages.install | default([]) }}'
@@ -113,10 +109,10 @@
 
     - name: Copy local packages
       when: common_packages.local is defined or packages.local is defined
-      copy:
+      community.openwrt.copy:
         src: packages/{{ item }}
         dest: /tmp
-      with_flattened:
+      with_community.general.flattened:
         - '{{ common_packages.local | default([]) }}'
         - '{{ packages.local | default([]) }}'
       loop_control:
@@ -124,11 +120,11 @@
 
     - name: Install local packages
       when: common_packages.local is defined or packages.local is defined
-      opkg:
+      community.openwrt.opkg:
         name: '/tmp/{{ item }}'
         state: present
         force: reinstall
-      with_flattened:
+      with_community.general.flattened:
         - '{{ common_packages.local | default([]) }}'
         - '{{ packages.local | default([]) }}'
       loop_control:
@@ -138,10 +134,10 @@
 
     - name: Cleanup copied local packages in /tmp
       when: common_packages.local is defined or packages.local is defined
-      file:
+      community.openwrt.file:
         name: '/tmp/{{ item }}'
         state: absent
-      with_flattened:
+      with_community.general.flattened:
         - '{{ common_packages.local | default([]) }}'
         - '{{ packages.local | default([]) }}'
       loop_control:
@@ -149,8 +145,10 @@
 
     - name: Pin packages
       when: common_packages.pin is defined or packages.pin is defined
-      shell: opkg flag hold {{ item }}
-      with_flattened:
+      community.openwrt.command:
+        cmd: opkg flag hold {{ item }}
+        uses_shell: true
+      with_community.general.flattened:
         - '{{ common_packages.pin | default([]) }}'
         - '{{ packages.pin | default([]) }}'
       loop_control:
@@ -158,60 +156,82 @@
 
     - name: Get packages that can be upgraded
       when: upgrade_packages is defined and upgrade_packages
-      shell: opkg list-upgradable | cut -d " " -f1
+      community.openwrt.command:
+        cmd: opkg list-upgradable | cut -d " " -f1
+        uses_shell: true
       register: available_upgrades_command
       check_mode: false
 
     - name: Get packages that can be upgraded
       when: upgrade_packages is defined and upgrade_packages
-      set_fact:
+      ansible.builtin.set_fact:
         available_upgrades: '{{ available_upgrades_command.stdout_lines }}'
       check_mode: false
 
     - name: Upgrade all other packages
       when: available_upgrades is defined
-      shell: opkg upgrade {{ item }}
-      with_flattened:
+      community.openwrt.command:
+        cmd: opkg upgrade {{ item }}
+        uses_shell: true
+      with_community.general.flattened:
         - '{{ available_upgrades }}'
       loop_control:
         label: Upgraded {{ item }}
 
     - name: Get public IP address
       when: upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip
-      shell: wget -qO- http://ipecho.net/plain
+      community.openwrt.command:
+        cmd: wget -qO- http://ipecho.net/plain
+        uses_shell: true
       register: external_ip_command
       check_mode: false
 
     - name: Set variable for public IP address
       when: upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip
-      set_fact:
+      ansible.builtin.set_fact:
         external_ip: '{{ external_ip_command.stdout_lines[0] }}'
 
     - name: Hash password
       delegate_to: localhost
-      become: no
-      shell: openssl passwd -salt 'YRNxiMTL' -1 '{{ ssh_password }}'
+      become: false
+      ansible.builtin.command:
+        cmd: openssl passwd -salt 'YRNxiMTL' -1 '{{ ssh_password }}'
       register: ssh_password_hashed_command
+      changed_when: false
       check_mode: false
 
     - name: Set variable for hashed password
-      set_fact:
+      ansible.builtin.set_fact:
         ssh_password_hashed: '{{ ssh_password_hashed_command.stdout_lines[0] }}'
 
-    - name: Creating required directories
-      file:
-        path: '{{item}}'
-        recurse: yes
+    - name: Creating required directories on OpenWrt
+      community.openwrt.file:
+        path: '{{ item }}'
+        recurse: true
         state: directory
       with_items:
         - /etc/crontabs
       loop_control:
         label: Created directory {{ item }}
 
-    - name: Copy configuration
-      template:
+    # Note: community.openwrt doesn't support .template (yet?),
+    # so create a temporary directory, use ansible.builtin.template
+    # from the host machine, and then copy the result to the router
+    - name: Create temporary directory
+      ansible.builtin.tempfile:
+        state: directory
+      register: tempdir
+      delegate_to: localhost
+      become: false
+      check_mode: false
+
+    - name: Create configuration
+      ansible.builtin.template:
         src: 'config/{{ item.name }}'
-        dest: '{{ item.path }}/{{ item.filename | default(item.name) }}'
+        dest: '{{ tempdir.path }}/{{ item.name }}'
+        mode: u=rw,g=rw,o=r
+      delegate_to: localhost
+      check_mode: false
       with_items:
         - name: authorized_keys
           path: /etc/dropbear
@@ -251,10 +271,53 @@
       vars:
         networks: "{{ common_networks | combine(host_networks | default({}), recursive=True) }}"
       loop_control:
+        label: Created {{ item.path }}/{{ item.filename | default(item.name) }} configuration in temporary folder
+
+    - name: Copy configuration
+      community.openwrt.copy:
+        src: '{{ tempdir.path }}/{{ item.name }}'
+        dest: '{{ item.path }}/{{ item.filename | default(item.name) }}'
+      with_items:
+        - name: authorized_keys
+          path: /etc/dropbear
+        - name: dhcp
+          path: /etc/config
+        - name: dnsmasq.conf
+          path: /etc
+        - name: ethers
+          path: /etc
+        - name: firewall
+          path: /etc/config
+        - name: luci
+          path: /etc/config
+        - name: network
+          path: /etc/config
+        - name: shadow
+          path: /etc
+        - name: sqm
+          path: /etc/config
+        - name: system
+          path: /etc/config
+        - name: uhttpd
+          path: /etc/config
+        - name: upnpd
+          path: /etc/config
+        - name: wireless
+          path: /etc/config
+        - name: dawn
+          path: /etc/config
+        - name: cron
+          path: /etc/crontabs
+          filename: root
+        - name: dropbear
+          path: /etc/config
+        - name: umdns
+          path: /etc/config
+      loop_control:
         label: Copied {{ item.path }}/{{ item.filename | default(item.name) }}
 
     - name: Copy configuration (binary files)
-      copy:
+      community.openwrt.copy:
         src: 'certs/{{ item.name }}'
         dest: '{{ item.path }}/{{ item.name }}'
       with_items:
@@ -264,12 +327,12 @@
           path: /etc
       loop_control:
         label: Copied {{ item.path }}/{{ item.name }}
-        
+
     - name: Copy additional scripts
-      copy:
+      community.openwrt.copy:
         src: 'bin/{{ item }}'
         dest: '/usr/sbin/{{ item }}'
-        mode: 0755
+        mode: u=rwx,g=rwx,o=rx
       with_items:
         - upgrade-all-packages
       loop_control:
@@ -277,20 +340,22 @@
 
     - name: Disable services
       when: disabled_services is defined
-      service:
+      community.openwrt.service:
         name: '{{ item }}'
         state: stopped
-        enabled: no
+        enabled: false
       loop: '{{ disabled_services }}'
       loop_control:
         label: Disabled service {{ item }}
 
     - name: Reboot device
       when: reboot_after is not defined or reboot_after
-      shell: reboot
+      community.openwrt.command:
+        cmd: reboot
+        uses_shell: true
 
     - name: Wait for reboot
       when: reboot_after is not defined or reboot_after
-      wait_for_connection:
+      ansible.builtin.wait_for_connection:
         timeout: 300
         delay: 60

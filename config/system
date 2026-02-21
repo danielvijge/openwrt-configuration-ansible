@@ -4,7 +4,7 @@ config system
 	option log_size '64'
 	option urandom_seed '0'
 	option zonename 'Europe/Amsterdam'
-	option hostname '{{ name }}'
+	option hostname '{{ hostname }}'
 	option log_proto 'udp'
 	option conloglevel '8'
 	option cronloglevel '5'

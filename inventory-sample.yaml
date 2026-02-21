@@ -9,8 +9,8 @@ openwrt:
         router:
           # ID of this device, will get the IP address ending in .1
           id: 1
-          # Unique name for this device
-          name: router
+          # Unique hostname for this device
+          hostname: router
           # Set the model, used to select the correct firmware
           # can also be used to differentiate configuration based on the model
           # if the complete network contains different models
@@ -65,8 +65,8 @@ openwrt:
         ap1:
           # ID of this device, will get the IP address ending in .2
           id: 2
-          # Unique name for this device
-          name: ap1
+          # Unique hostname for this device
+          hostname: ap1
           # MAC address of the port that connect upstream. For the a[] this
           # is the internet (WAN) port that is connected to the router
           mac: E0:5A:EB:0A:73:1C
@@ -75,7 +75,7 @@ openwrt:
         # Configuration of additional devices
         ap2:
           id: 3
-          name: ap2
+          hostname: ap2
           model: wdr4300
           mac: 3E:DE:7C:A8:98:EF
           duid: 000300013ede7ca898ef

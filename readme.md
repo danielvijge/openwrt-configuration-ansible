@@ -255,9 +255,9 @@ in the filename.
 ### Requirements for local machine
 
 * Ansible
-* Ansible openwrt plugin, can be installed with
+* Ansible OpenWrt collection, can be installed with
 ```
-ansible-galaxy install gekmihesg.openwrt
+ansible-galaxy collection install community.openwrt
 ```
 * openssl (for generating the password in _/etc/shadow_ for the root user)
 
@@ -267,3 +267,4 @@ ansible-galaxy install gekmihesg.openwrt
 ansible-playbook --inventory inventory.yaml openwrt.yaml
 ```
 or add the option `--check` to perform a dry-run first without applying any changes.
+Add `--limit {hostname}` to deploy or test to a single router instead of all routers/access points.

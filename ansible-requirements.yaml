@@ -1,5 +1,4 @@
-roles:
-  - name: gekmihesg.openwrt
 collections:
   - name: ansible.utils
   - name: community.general
+  - name: community.openwrt

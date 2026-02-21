@@ -1,8 +1,9 @@
-- hosts: openwrt
+- name: Test configuration templates for OpenWrt upgrade playbook
+  hosts: openwrt
   connection: local
   user: root
-  become: no
-  gather_facts: no
+  become: false
+  gather_facts: false
   serial: 1
   ignore_unreachable: true
   vars:
@@ -12,30 +13,34 @@
 
     - name: Get public IP address
       when: upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip
-      shell: wget -qO- http://ipecho.net/plain
+      ansible.builtin.command:
+        cmd: wget -qO- http://ipecho.net/plain # noqa: command-instead-of-module
       register: external_ip_command
+      changed_when: false
       check_mode: false
 
     - name: Set variable for public IP address
       when: upnp.configure_with_external_ip is defined and upnp.configure_with_external_ip
-      set_fact:
+      ansible.builtin.set_fact:
         external_ip: '{{ external_ip_command.stdout_lines[0] }}'
 
     - name: Hash password
       delegate_to: localhost
-      become: no
-      shell: openssl passwd -salt 'YRNxiMTL' -1 '{{ ssh_password }}'
+      become: false
+      ansible.builtin.command:
+        cmd: openssl passwd -salt 'YRNxiMTL' -1 '{{ ssh_password }}'
       register: ssh_password_hashed_command
+      changed_when: false
       check_mode: false
 
     - name: Set variable for hashed password
-      set_fact:
+      ansible.builtin.set_fact:
         ssh_password_hashed: '{{ ssh_password_hashed_command.stdout_lines[0] }}'
 
     - name: Creating required directories
-      file:
-        path: '{{item}}'
-        recurse: yes
+      ansible.builtin.file:
+        path: '{{ item }}'
+        recurse: true
         state: directory
       with_items:
         - etc
@@ -46,9 +51,10 @@
         label: Created directory {{ item }}
 
     - name: Copy configuration
-      template:
+      ansible.builtin.template:
         src: 'config/{{ item.name }}'
         dest: '{{ item.path }}/{{ item.filename | default(item.name) }}'
+        mode: u=rw,g=rw,o=r
       with_items:
         - name: authorized_keys
           path: etc/dropbear
@@ -91,9 +97,10 @@
         label: Copied {{ item.path }}/{{ item.filename | default(item.name) }}
 
     - name: Copy configuration (binary files)
-      copy:
+      ansible.builtin.copy:
         src: 'certs/{{ item.name }}'
         dest: '{{ item.path }}/{{ item.name }}'
+        mode: u=rw,g=rw,o=r
       with_items:
         - name: uhttpd.crt
           path: etc

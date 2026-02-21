@@ -49,7 +49,7 @@ config host
 	option mac '{{ hostvars[ap].mac }}'
 	option dns '1'
 	option ip '{{ networks.lan.cidr | ansible.utils.ipaddr(hostvars[ap].id) | ansible.utils.ipv4('address')}}'
-	option name '{{ hostvars[ap].hostname }}'
+	option name '{{ inventory_hostname_short }}'
 	option hostid '{{ hostvars[ap].id }}'
 	option duid '{{ hostvars[ap].duid }}'
 

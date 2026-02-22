@@ -225,53 +225,25 @@
       become: false
       check_mode: false
 
+    - name: Get all configuration files
+      ansible.builtin.find:
+        file_type: file
+        paths: config
+      delegate_to: localhost
+      register: configuration_files
+
     - name: Create configuration
       ansible.builtin.template:
-        src: 'config/{{ item.name }}'
-        dest: '{{ tempdir.path }}/{{ item.name }}'
+        src: 'config/{{ item }}'
+        dest: '{{ tempdir.path }}/{{ item }}'
         mode: u=rw,g=rw,o=r
       delegate_to: localhost
       check_mode: false
-      with_items:
-        - name: authorized_keys
-          path: /etc/dropbear
-        - name: dhcp
-          path: /etc/config
-        - name: dnsmasq.conf
-          path: /etc
-        - name: ethers
-          path: /etc
-        - name: firewall
-          path: /etc/config
-        - name: luci
-          path: /etc/config
-        - name: network
-          path: /etc/config
-        - name: shadow
-          path: /etc
-        - name: sqm
-          path: /etc/config
-        - name: system
-          path: /etc/config
-        - name: uhttpd
-          path: /etc/config
-        - name: upnpd
-          path: /etc/config
-        - name: wireless
-          path: /etc/config
-        - name: dawn
-          path: /etc/config
-        - name: cron
-          path: /etc/crontabs
-          filename: root
-        - name: dropbear
-          path: /etc/config
-        - name: umdns
-          path: /etc/config
+      with_items: '{{ configuration_files.files | map(attribute="path") | map("basename") }}'
       vars:
         networks: "{{ common_networks | combine(host_networks | default({}), recursive=True) }}"
       loop_control:
-        label: Created {{ item.path }}/{{ item.filename | default(item.name) }} configuration in temporary folder
+        label: Created {{ item }} configuration in temporary folder
 
     - name: Copy configuration
       community.openwrt.copy:

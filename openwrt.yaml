@@ -54,9 +54,14 @@
 
     - name: Wait for reboot
       when: firmware != '' and not latest_version_installed
-      ansible.builtin.wait_for_connection:
-        timeout: 300
-        delay: 60
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: '{{ ansible_host }}'
+        port: 22
+        delay: 30
+        sleep: 10
+        connect_timeout: 5
+        timeout: 600
 
     - name: Ensure reboot after configuration
       when: firmware != '' and not latest_version_installed
@@ -64,100 +69,84 @@
         reboot_after: true
 
     - name: Get a list of all installed packages
-      community.openwrt.command:
-        cmd: opkg list-installed | cut -d " " -f1
-        uses_shell: true
-      register: installed_packages_command
-      check_mode: false
+      community.openwrt.package_facts:
 
     - name: Get a list of all installed packages
       ansible.builtin.set_fact:
-        installed_packages: '{{ installed_packages_command.stdout_lines }}'
-      check_mode: false
+        installed_packages: '{{ packages.keys() | list }}'
 
     - name: Remove packages
-      when: (common_packages.remove is defined or packages.remove is defined) and item in installed_packages
-      community.openwrt.opkg:
+      when: (common_packages.remove is defined or device_packages.remove is defined) and item in installed_packages
+      community.openwrt.apk:
         name: '{{ item }}'
         state: absent
-      with_community.general.flattened:
+      with_flattened:
         - '{{ common_packages.remove | default([]) }}'
-        - '{{ packages.remove | default([]) }}'
+        - '{{ device_packages.remove | default([]) }}'
       loop_control:
         label: Removed {{ item }}
 
-    - name: Set required packages for gekmihesg.openwrt
+    - name: Set required packages for community.openwrt
       when: firmware != '' and not latest_version_installed
       ansible.builtin.set_fact:
-        gekmihesg_openwrt_required_packages:
+        ansible_openwrt_required_packages:
           - coreutils-base64
           - coreutils-md5sum
           - coreutils-sha1sum
 
     - name: Install packages
-      when: (common_packages.install is defined or packages.install is defined) and item not in installed_packages
-      community.openwrt.opkg:
+      when: (common_packages.install is defined or device_packages.install is defined) and item not in installed_packages
+      community.openwrt.apk:
         name: '{{ item }}'
         state: present
         update_cache: true
-      with_community.general.flattened:
-        - '{{ gekmihesg_openwrt_required_packages | default([]) }}'
+      with_flattened:
+        - '{{ ansible_openwrt_required_packages | default([]) }}'
         - '{{ common_packages.install | default([]) }}'
-        - '{{ packages.install | default([]) }}'
+        - '{{ device_packages.install | default([]) }}'
       loop_control:
         label: Installed {{ item }}
 
     - name: Copy local packages
-      when: common_packages.local is defined or packages.local is defined
+      when: common_packages.local is defined or device_packages.local is defined
       community.openwrt.copy:
         src: packages/{{ item }}
         dest: /tmp
-      with_community.general.flattened:
+      with_flattened:
         - '{{ common_packages.local | default([]) }}'
-        - '{{ packages.local | default([]) }}'
+        - '{{ device_packages.local | default([]) }}'
       loop_control:
         label: Copied {{ item }}
 
     - name: Install local packages
-      when: common_packages.local is defined or packages.local is defined
-      community.openwrt.opkg:
+      when: common_packages.local is defined or device_packages.local is defined
+      community.openwrt.apk:
         name: '/tmp/{{ item }}'
         state: present
         force: reinstall
-      with_community.general.flattened:
+      with_flattened:
         - '{{ common_packages.local | default([]) }}'
-        - '{{ packages.local | default([]) }}'
+        - '{{ device_packages.local | default([]) }}'
       loop_control:
         label: Installed {{ item }}
-      register: opkg_install_local_command
-      failed_when: '"Installing " not in opkg_install_local_command.msg'
+      register: apk_install_local_command
+      failed_when: '"Installing " not in apk_install_local_command.msg'
 
     - name: Cleanup copied local packages in /tmp
-      when: common_packages.local is defined or packages.local is defined
+      when: common_packages.local is defined or device_packages.local is defined
       community.openwrt.file:
         name: '/tmp/{{ item }}'
         state: absent
-      with_community.general.flattened:
+      with_flattened:
         - '{{ common_packages.local | default([]) }}'
-        - '{{ packages.local | default([]) }}'
+        - '{{ device_packages.local | default([]) }}'
       loop_control:
         label: Cleaned up /tmp/{{ item }}
-
-    - name: Pin packages
-      when: common_packages.pin is defined or packages.pin is defined
-      community.openwrt.command:
-        cmd: opkg flag hold {{ item }}
-        uses_shell: true
-      with_community.general.flattened:
-        - '{{ common_packages.pin | default([]) }}'
-        - '{{ packages.pin | default([]) }}'
-      loop_control:
-        label: Pinned {{ item }}
 
     - name: Get packages that can be upgraded
       when: upgrade_packages is defined and upgrade_packages
       community.openwrt.command:
-        cmd: opkg list-upgradable | cut -d " " -f1
+        cmd: apk info --upgradable
         uses_shell: true
       register: available_upgrades_command
       check_mode: false
@@ -171,9 +160,9 @@
     - name: Upgrade all other packages
       when: available_upgrades is defined
       community.openwrt.command:
-        cmd: opkg upgrade {{ item }}
+        cmd: apk upgrade {{ item }}
         uses_shell: true
-      with_community.general.flattened:
+      with_flattened:
         - '{{ available_upgrades }}'
       loop_control:
         label: Upgraded {{ item }}
@@ -321,13 +310,18 @@
         label: Disabled service {{ item }}
 
     - name: Reboot device
-      when: reboot_after is not defined or reboot_after
+      when: reboot_after
       community.openwrt.command:
         cmd: reboot
         uses_shell: true
 
     - name: Wait for reboot
-      when: reboot_after is not defined or reboot_after
-      ansible.builtin.wait_for_connection:
-        timeout: 300
-        delay: 60
+      when: reboot_after
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: '{{ ansible_host }}'
+        port: 22
+        delay: 30
+        sleep: 10
+        connect_timeout: 5
+        timeout: 600

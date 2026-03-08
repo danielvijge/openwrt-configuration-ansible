@@ -14,12 +14,12 @@ fi
 echo ""
 
 echo -n "Updating package list..."
-opkg update > /dev/null
+apk update > /dev/null
 echo ""
 
-if [ `opkg list-upgradable | cut -d " " -f1 | wc -l` -gt 0 ]; then
+if [ `apk list --upgradable | wc -l` -gt 0 ]; then
   echo "Available updates:"
-  opkg list-upgradable
+  apk list --upgradable
   echo ""
 
   valid=0
@@ -31,7 +31,7 @@ if [ `opkg list-upgradable | cut -d " " -f1 | wc -l` -gt 0 ]; then
         valid=1
         echo ""
         echo "Upgrading all packages..."
-        opkg list-upgradable | cut -d " " -f1 | xargs -r opkg upgrade
+        apk upgrade
         ;;
       n|N|"" )
         valid=1

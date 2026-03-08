@@ -19,6 +19,11 @@ config dnsmasq
 {% if dhcp is defined and dhcp.tags is defined %}
 	option strictorder '1'
 {% endif %}
+{% for _, network in networks.items() %}
+{% if _ not in ('wan','additional') %}
+	list addnhosts '/tmp/odhcp.leases/odhcpd.hosts.{{ _ }}'
+{% endif %}
+{% endfor %}
 
 {% for _, network in networks.items() %}
 {% if _ not in ('wan','additional') %}
@@ -28,8 +33,12 @@ config dhcp '{{ _ }}'
 	option leasetime '12h'
 	option start '{{ groups['openwrt'] | length +2 }}'
 	option ra '{{ 'server' if inventory_hostname in groups['routers'] else 'hybrid' }}'
+	option dhcpv4 '{{ 'server' if inventory_hostname in groups['routers'] else 'disabled' }}'
 	option dhcpv6 '{{ 'server' if inventory_hostname in groups['routers'] else 'hybrid' }}'
 	option ra_management '1'
+	option ra_preference 'medium'
+	list ra_flags 'managed-config'
+	list ra_flags 'other-config'
 
 {% endif %}
 {% endfor %}
@@ -43,15 +52,16 @@ config odhcpd 'odhcpd'
 	option leasetrigger '/usr/sbin/odhcpd-update'
 {# was 4, set to 3 to disable message 'No default route present, overriding ra_lifetime' #}
 	option loglevel '3'
+	option hostsdir '/tmp/odhcp.leases'
 
 {% for ap in aps %}
 config host
 	option mac '{{ hostvars[ap].mac }}'
 	option dns '1'
 	option ip '{{ networks.lan.cidr | ansible.utils.ipaddr(hostvars[ap].id) | ansible.utils.ipv4('address')}}'
-	option name '{{ inventory_hostname_short }}'
-	option hostid '{{ hostvars[ap].id }}'
-	option duid '{{ hostvars[ap].duid }}'
+	option name '{{ hostvars[ap].inventory_hostname_short }}'
+	option hostid '{{ "%04d" % hostvars[ap].id }}'
+	list duid '{{ hostvars[ap].duid }}'
 
 {% endfor %}
 {% if static_hosts is defined %}
@@ -61,8 +71,8 @@ config host
 	option mac '{{ host.mac }}'
 	option dns '1'
 	option ip '{{ networks[host.network | default('lan')].cidr | ansible.utils.ipaddr(host.id) | ansible.utils.ipv4('address')}}'
-	option hostid '{{ host.id }}'
-	option duid '{{ host.duid }}'
+	option hostid '{{ "%04d" % host.id }}'
+	list duid '{{ host.duid }}'
 	
 {% endfor %}
 {% endif %}

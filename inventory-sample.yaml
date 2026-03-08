@@ -25,7 +25,7 @@ openwrt:
           # HTMode for the wireless radio on the 5Hz band
           radio5_htmode: VHT80
       vars:
-        packages:
+        device_packages:
           # Packages that will be installed on all devices in the group routers,
           # but not on devices on other groups
           install:
@@ -39,10 +39,6 @@ openwrt:
           # all devices in the routers group
           local:
             - miniupnpd_2.1.20200510-3_mips_24kc.ipk
-          # Packaged are pinned (can will not be automatically upgraded by opkg).
-          # Useful if a specific local version is installed
-          pin:
-            - miniupnpd
         # Network settiongs that are specific to this device. This dict will be merged
         # with openwrt.vars.networks into one dict.
         host_networks:
@@ -95,7 +91,7 @@ openwrt:
             - dnsmasq
             - firewall
             - odhcpd
-          packages:
+          device_packages:
             # Packages that will be removed for all devices the group aps
             # remove:
             #   - sample

@@ -247,6 +247,11 @@ openwrt:
     ethers:
       - name: smartHomeDevice
         mac: 59:A7:68:D6:09:8B
+      - name: broken-dhcpv6-hostname
+        mac: C5:45:1E:F9:74:4F
+        # If duid is set, it adds a DHCP lease without a specific IP/token. Can be used
+        # to fix broken DHCPv6 hostnames.
+        duid: 0001000123f7fb79c5451ef9744f
     # Smart Queue Management settings (only used if SQM is installed)
     sqm:
       download: 23000

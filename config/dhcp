@@ -73,7 +73,18 @@ config host
 	option ip '{{ networks[host.network | default('lan')].cidr | ansible.utils.ipaddr(host.id) | ansible.utils.ipv4('address')}}'
 	option hostid '{{ "%04d" % host.id }}'
 	list duid '{{ host.duid }}'
+
+{% endfor %}
+{% endif %}
+{% if ethers is defined %}
+{% for host in ethers %}
+{% if host.duid is defined %}
+config host
+	option name '{{ host.name }}'
+	option mac '{{ host.mac }}'
+	list duid '{{ host.duid }}'
 	
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if host_names is defined %}

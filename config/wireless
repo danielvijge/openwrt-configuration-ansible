@@ -20,7 +20,7 @@ config wifi-device 'radio1'
 
 {% for _, network in networks.items() %}
 {% if network.wireless is defined %}
-{% for wireless in network.wireless  %}
+{% for wireless in network.wireless %}
 config wifi-iface 'wifi{{ wifi.index }}_radio0'
 	option device 'radio0'
 	option network '{{ _ }}'

@@ -20,6 +20,7 @@ config zone
 	option mtu_fix '1'
 	option input 'REJECT'
 	option forward 'REJECT'
+{% if inventory_hostname in groups['routers'] %}
 	list network 'wan'
 	list network 'wan6'
 {% if henet is defined %}
@@ -27,6 +28,7 @@ config zone
 {% endif %}
 {% if ipv6_6to4 is defined %}
 	list network 'wan6to4'
+{% endif %}
 {% endif %}
 
 config forwarding

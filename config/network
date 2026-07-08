@@ -29,7 +29,7 @@ config switch_vlan
 
 {% if inventory_hostname in groups['routers'] %}
 config device
-  option name 'eth0.{{ networks.wan.vlan_id | default('2') }}'
+	option name 'eth0.{{ networks.wan.vlan_id | default('2') }}'
 
 config interface 'lan'
 	option device 'br-lan'
@@ -43,24 +43,24 @@ config interface 'lan'
 
 {% set vlan.index = vlan.index + 1%}
 config interface 'wan'
-  option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
-  option proto 'dhcp'
-  option multipath 'off'
+	option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
+	option proto 'dhcp'
+	option multipath 'off'
 
 config interface 'wan6'
-  option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
-  option proto 'dhcpv6'
-  option reqaddress 'try'
-  option reqprefix 'auto'
-  option norelease '1'
-  option multipath 'off'
+	option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
+	option proto 'dhcpv6'
+	option reqaddress 'try'
+	option reqprefix 'auto'
+	option norelease '1'
+	option multipath 'off'
 
 config switch_vlan
-  option device 'switch0'
-  option vlan '{{ vlan.index }}'
-  option ports '{{ networks.wan.ports | default('1 0t') }}'
-  option vid '{{ networks.wan.vlan_id | default('2') }}'
-  option description '{{ networks.wan.name | default('wan') }}'
+	option device 'switch0'
+	option vlan '{{ vlan.index }}'
+	option ports '{{ networks.wan.ports | default('1 0t') }}'
+	option vid '{{ networks.wan.vlan_id | default('2') }}'
+	option description '{{ networks.wan.name | default('wan') }}'
 
 {% if ipv6_6to4 is defined %}
 config interface 'wan6to4'
@@ -135,11 +135,11 @@ config switch_vlan
 {% for network in networks.additional %}
 {% set vlan.index = vlan.index + 1%}
 config switch_vlan
-  option device 'switch0'
-  option vlan '{{ vlan.index }}'
-  option ports '{{ network.ports }}'
-  option vid '{{ network.vlan_id }}'
-  option description '{{ network.name }}'
+	option device 'switch0'
+	option vlan '{{ vlan.index }}'
+	option ports '{{ network.ports }}'
+	option vid '{{ network.vlan_id }}'
+	option description '{{ network.name }}'
 
 {% endfor %}
 {% endif %}

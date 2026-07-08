@@ -125,6 +125,8 @@ openwrt:
     local_domain: home.arpa
     # Local IPv6 addresses
     ula_prefix: fd54:28cd:b1c3::/48
+    # The default DUID for this system, used when acting as a DHCP/DHCPv6 server or client
+    dhcp_default_duid: 000421ab8644155e44f2b862f41795d31e92
     # Define the networks and wireless networks. This creates networks,
     # firewall zones, and wireless networks. Two networks have a special
     # meaning:

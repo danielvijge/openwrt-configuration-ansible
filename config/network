@@ -9,6 +9,9 @@ config interface 'loopback'
 config globals 'globals'
 	option ula_prefix '{{ ula_prefix }}'
 	option packet_steering '0'
+{% if inventory_hostname in groups['routers'] %}
+	option dhcp_default_duid '{{ dhcp_default_duid }}'
+{% endif %}
 
 config switch
 	option name 'switch0'

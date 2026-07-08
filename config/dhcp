@@ -21,7 +21,7 @@ config dnsmasq
 {% endif %}
 {% for _, network in networks.items() %}
 {% if _ not in ('wan','additional') %}
-	list addnhosts '/tmp/odhcp.leases/odhcpd.hosts.{{ _ }}'
+	list addnhosts '/tmp/odhcpd-hostsdir/odhcpd.hosts.{{ _ }}'
 {% endif %}
 {% endfor %}
 
@@ -36,7 +36,9 @@ config dhcp '{{ _ }}'
 	option dhcpv4 '{{ 'server' if inventory_hostname in groups['routers'] else 'disabled' }}'
 	option dhcpv6 '{{ 'server' if inventory_hostname in groups['routers'] else 'hybrid' }}'
 	option ra_management '1'
+{% if inventory_hostname in groups['routers'] %}
 	option ra_preference 'medium'
+{% endif %}
 	list ra_flags 'managed-config'
 	list ra_flags 'other-config'
 
@@ -47,12 +49,12 @@ config dhcp 'wan'
 	option ignore '1'
 
 config odhcpd 'odhcpd'
-	option maindhcp '0'
-	option leasefile '/tmp/hosts/odhcpd'
+	option leasefile '/tmp/odhcpd.leases'
 	option leasetrigger '/usr/sbin/odhcpd-update'
 {# was 4, set to 3 to disable message 'No default route present, overriding ra_lifetime' #}
 	option loglevel '3'
-	option hostsdir '/tmp/odhcp.leases'
+	option hostsdir '/tmp/odhcpd-hostsdir'
+	option piodir '/tmp/odhcpd-piodir'
 
 {% for ap in aps %}
 config host

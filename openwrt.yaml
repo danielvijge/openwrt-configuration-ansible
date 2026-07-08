@@ -283,6 +283,8 @@
           path: /etc/config
         - name: umdns
           path: /etc/config
+        - name: attendedsysupgrade
+          path: /etc/config
       loop_control:
         label: Copied {{ item.path }}/{{ item.filename | default(item.name) }}
 

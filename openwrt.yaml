@@ -71,6 +71,7 @@
       until: network_reacable.rc == 0
       delay: 30
       retries: 60 # wait max 30 minutes for internet connection
+      check_mode: false
 
     - name: Ensure reboot after configuration
       when: firmware != '' and not latest_version_installed

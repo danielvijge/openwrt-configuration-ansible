@@ -9,8 +9,8 @@ config interface 'loopback'
 config globals 'globals'
 	option ula_prefix '{{ ula_prefix }}'
 	option packet_steering '0'
-{% if inventory_hostname in groups['routers'] %}
-	option dhcp_default_duid '{{ dhcp_default_duid }}'
+{% if inventory_hostname in groups['routers'] and dhcp.default_duid is defined %}
+	option dhcp_default_duid '{{ dhcp.default_duid }}'
 {% endif %}
 
 config switch
@@ -49,6 +49,11 @@ config interface 'wan'
 	option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
 	option proto 'dhcp'
 	option multipath 'off'
+{% if dhcp.sendclientid.wan is defined %}
+	option sendclientid '{{ dhcp.sendclientid.wan }}'
+{% else %}
+	option sendclientid 'auto'
+{% endif %}
 
 config interface 'wan6'
 	option device 'eth0.{{ networks.wan.vlan_id | default('2') }}'
@@ -57,6 +62,11 @@ config interface 'wan6'
 	option reqprefix 'auto'
 	option norelease '1'
 	option multipath 'off'
+{% if dhcp.sendclientid.wan6 is defined %}
+	option sendclientid '{{ dhcp.sendclientid.wan6 }}'
+{% else %}
+	option sendclientid 'auto'
+{% endif %}
 
 config switch_vlan
 	option device 'switch0'

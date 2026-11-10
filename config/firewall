@@ -233,3 +233,37 @@ config ipset
 	list entry '{{ blocked_device }}'
 {% endfor %}
 {% endif %}
+
+{% if firewall is defined and firewall.rules is defined %}
+{% for rule in firewall.rules %}
+config rule
+	option name '{{ rule.name }}'
+{% if rule.src is defined %}
+	option src '{{ rule.src }}'
+{% endif %}
+{% if rule.dest is defined %}
+	option dest '{{ rule.dest }}'
+{% endif %}
+{% if rule.src_mac is defined %}
+{% for src_mac in [rule.src_mac] | flatten %}
+	list option src_mac '{{ src_mac }}'
+{% endfor %}
+{% endif %}
+{% if rule.src_ip is defined %}
+	option src_ip '{{ rule.src_ip }}'
+{% endif %}
+{% if rule.dest_ip is defined %}
+	option dest_ip '{{ rule.dest_ip }}'
+{% endif %}
+{% if rule.proto is defined %}
+	option proto '{{ rule.proto }}'
+{% endif %}
+{% if rule.dest_port is defined %}
+	option dest_port '{{ rule.dest_port }}'
+{% endif %}
+{% if rule.target is defined %}
+	option target '{{ rule.target }}'
+{% endif %}
+	option enabled '1'
+{% endfor %}
+{% endif %}
